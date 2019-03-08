@@ -1,0 +1,6 @@
+#!/bin/bash
+
+projectdir=$1
+workdir="$(pwd)/$projectdir"
+
+nvidia-docker run --rm -v "$workdir":/src --net host -it cuda-base
