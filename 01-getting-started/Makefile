@@ -277,7 +277,7 @@ endif
 # Target rules
 all: build
 
-build: dataElem
+build: DataElem
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -286,7 +286,7 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-dataElem.o:dataElem.cu
+DataElem.o:DataElem.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
 Managed.o:Managed.cu
@@ -295,16 +295,16 @@ Managed.o:Managed.cu
 String.o:String.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
-dataElem: Managed.o String.o dataElem.o
+DataElem: Managed.o String.o DataElem.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
 run: build
-	$(EXEC) ./dataElem
+	$(EXEC) ./DataElem
 
 clean:
-	rm -f dataElem dataElem.o Managed.o String.o
-	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/dataElem
+	rm -f DataElem DataElem.o Managed.o String.o
+	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/DataElem
 
 clobber: clean

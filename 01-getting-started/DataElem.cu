@@ -5,13 +5,8 @@
 
 #include "Managed.cuh"
 #include "String.cuh"
+#include "DataElement.cuh"
 
-
-struct DataElement : public Managed
-{
-    String name;
-    int value;
-};
 
 __global__
 void Kernel_by_pointer(DataElement *elem) {
