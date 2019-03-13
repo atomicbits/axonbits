@@ -27,10 +27,12 @@ String& String::operator=(const char *s) {
 }
 
 // Element access (from host or device)
-__host__ __device__ char& String::operator[](int pos) { return data[pos]; }
+__host__ __device__
+char& String::operator[](int pos) { return data[pos]; }
 
 // C-string access
-__host__ __device__ const char* String::c_str() const { return data; }
+__host__ __device__
+const char* String::c_str() const { return data; }
 
 void String::_realloc(int len) {
     cudaFree(data);

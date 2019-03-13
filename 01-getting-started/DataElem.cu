@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 
     printf("On host (after by-value):   name=%s, value=%d\n", e->name.c_str(), e->value);
 
-    //delete e;
+    delete e;
 
     cudaDeviceReset();
 

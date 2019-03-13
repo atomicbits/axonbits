@@ -26,10 +26,12 @@ public:
     String &operator=(const char*);
 
     // Element access (from host or device)
-    __host__ __device__ char& operator[](int);
+    __host__ __device__
+    char& operator[](int);
 
     // C-string access
-    __host__ __device__ const char* c_str() const;
+    __host__ __device__
+    const char* c_str() const;
 
 private:
     int length;
