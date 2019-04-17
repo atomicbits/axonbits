@@ -1,3 +1,5 @@
 *target*
 *.idea*
+*.o*
+02-repititive-in-mem-process/controller
 

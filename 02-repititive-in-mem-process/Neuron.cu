@@ -4,11 +4,17 @@
 
 #include "Neuron.cuh"
 
-Neuron::Neuron() : id(0), v(0), group_firing_q_index(0) {}
+Neuron::Neuron() : id(0),
+                   activity(0),
+                   previous_activity(0),
+                   long_term_avg_activity(0) {}
 
 // Copy constructor
-Neuron::Neuron(const Neuron &s) : id(0), v(0), group_firing_q_index(0) {
-}
+Neuron::Neuron(const Neuron &neuron) : id(neuron.id),
+                                       activity(neuron.activity),
+                                       previous_activity(neuron.previous_activity),
+                                       long_term_avg_activity(neuron.long_term_avg_activity),
+                                       properties(neuron.properties) {}
 
 Neuron::~Neuron() {
     // cudaFree(data); // free the pointers!

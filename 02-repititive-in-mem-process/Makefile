@@ -257,6 +257,9 @@ controller.o:controller.cu
 Managed.o:Managed.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
+NeuronProperties.o:NeuronProperties.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
 Neuron.o:Neuron.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
@@ -266,7 +269,7 @@ Synapse.o:Synapse.cu
 NeuralNet.o:NeuralNet.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
-controller: Managed.o NeuralNet.o controller.o Neuron.o Synapse.o
+controller: Managed.o NeuralNet.o controller.o NeuronProperties.o Neuron.o Synapse.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
@@ -275,7 +278,7 @@ run: build
 	$(EXEC) ./controller
 
 clean:
-	rm -f controller controller.o Managed.o NeuralNet.o Neuron.o Synapse.o
+	rm -f controller controller.o Managed.o NeuralNet.o Neuron.o Synapse.o NeuronProperties.o
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/controller
 
 clobber: clean

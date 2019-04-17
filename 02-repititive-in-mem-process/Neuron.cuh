@@ -5,8 +5,14 @@
 #ifndef INC_02_REPITITIVE_IN_MEM_PROCESS_NEURON_H
 #define INC_02_REPITITIVE_IN_MEM_PROCESS_NEURON_H
 
+#include "Managed.cuh"
+#include "NeuronProperties.cuh"
+#include "Synapse.cuh"
 
-class Neuron {
+class NeuronProperties; // forward declaration to cope with cyclic dependency
+class Synapse; // forward declaration to cope with cyclic dependency
+
+class Neuron : public Managed {
 public:
     // Default Constructor
     Neuron();
@@ -23,13 +29,11 @@ public:
 
 private:
     unsigned long int id;
-    float v;
-    unsigned short int group_firing_q_index;
-    // Synapse *outgoing_synapses[];
-    // NeuronFiringQueue *incoming_firing_q;
-    // NeuronFiringQueue *incoming_firing_q_history;
-    // updateFunction();
-
+    float activity;
+    float previous_activity;
+    float long_term_avg_activity;
+    Synapse *incoming_synapses[];
+    NeuronProperties *properties;
 };
 
 
