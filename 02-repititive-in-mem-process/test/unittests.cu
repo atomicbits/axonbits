@@ -26,6 +26,15 @@ int launch_test(ArrayTest *arrayTest) {
     run_test<<< 1, 1 >>>(arrayTest);
     cudaDeviceSynchronize();
 
+
+    cudaError_t cudaError;
+    cudaError = cudaGetLastError();
+    if(cudaError != cudaSuccess)
+    {
+        printf("  cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+    }
+
+
     result = arrayTest->getResult();
     printf("Result after is %i\n", result);
 
