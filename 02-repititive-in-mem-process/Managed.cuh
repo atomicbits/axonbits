@@ -12,10 +12,10 @@
 class Managed {
 public:
 
-    __host__ __device__
+    __host__
     void *operator new(size_t);
 
-    __host__ __device__
+    __host__
     void operator delete(void *);
 };
 

@@ -14,10 +14,10 @@ class TestContainer : public Managed {
 
 public:
 
-    __device__
+    __host__
     TestContainer() {}
 
-    __device__
+    __host__
     TestContainer(float a_init,
                   float b_init,
                   float c_init,
@@ -30,7 +30,7 @@ public:
                                          y(y_init),
                                          z(z_init) {}
 
-    __device__
+    __host__
     ~TestContainer() {}
 
     __device__
@@ -63,12 +63,19 @@ class ArrayTest : public Managed {
 
 public:
 
-    __device__
-    void test() {
-        Array<TestContainer>* arr = new Array<TestContainer>(5);
+    __host__
+    ArrayTest() {
+        arr = new Array<TestContainer>(5);
         arr->append(new TestContainer(1.0, 2.0, 3.0, 1, 2, 3));
         arr->append(new TestContainer(4.0, 5.0, 6.0, 4, 5, 6));
         arr->append(new TestContainer(7.0, 8.0, 9.0, 7, 8, 9));
+    }
+
+    __host__
+    ~ArrayTest() {}
+
+    __device__
+    void test() {
         assert((*arr)[0].addAB() == 3.0);
         assert((*arr)[1].addBC() == 11.0);
         assert((*arr)[2].addXY() == 15);
@@ -82,6 +89,7 @@ public:
 
 private:
     int result = 0;
+    Array<TestContainer>* arr;
 
 };
 
