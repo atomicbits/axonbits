@@ -23,7 +23,7 @@ public:
                   float c_init,
                   int x_init,
                   int y_init,
-                  unsigned int z_init) : a(a_init),
+                  int z_init) : a(a_init),
                                          b(b_init),
                                          c(c_init),
                                          x(x_init),
@@ -36,14 +36,20 @@ public:
     __device__
     float addAB() { return a + b; }
 
+    __host__ __device__
+    float getC() { return c; }
+
     __device__
-    float addBC() { return b + c; }
+    void setC(float c_upd) { c = c_upd; }
 
     __device__
     int addXY() { return x + y; }
 
+    __host__ __device__
+    int getZ() { return z; }
+
     __device__
-    int addYZ() { return y + z; }
+    void setZ(int z_upd) { z = z_upd; }
 
 
 private:
@@ -52,7 +58,7 @@ private:
     float c;
     int x;
     int y;
-    unsigned int z;
+    int z;
 
 };
 
@@ -66,29 +72,46 @@ public:
     __host__
     ArrayTest() {
         arr = new Array<TestContainer>(5);
-        arr->append(new TestContainer(1.0, 2.0, 3.0, 1, 2, 3));
+        arr->append(new TestContainer(1.0, 2.0, 300.0, 1, 2, 100));
         arr->append(new TestContainer(4.0, 5.0, 6.0, 4, 5, 6));
         arr->append(new TestContainer(7.0, 8.0, 9.0, 7, 8, 9));
+        result = 5;
     }
 
     __host__
-    ~ArrayTest() {}
+    ~ArrayTest() {
+        delete arr;
+    }
 
     __device__
     void test() {
-        assert((*arr)[0].addAB() == 3.0);
-        assert((*arr)[1].addBC() == 11.0);
-        assert((*arr)[2].addXY() == 15);
-        result = 0;
+
+        result = 14;
+
+        float ab = (*arr)[0].addAB();
+        // assert(ab == 3.0);
+        (*arr)[0].setC(ab);
+
+        int xy = (*arr)[2].addXY();
+        // assert(xy == 16); // should be 15!
+        (*arr)[2].setZ(xy);
+
+        result = -1;
         return;
     }
 
+    __host__
     int getResult() {
         return result;
     }
 
+    __host__
+    Array<TestContainer>* getArray() {
+        return arr;
+    }
+
 private:
-    int result = 0;
+    int result;
     Array<TestContainer>* arr;
 
 };
