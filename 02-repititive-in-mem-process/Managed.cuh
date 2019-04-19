@@ -11,8 +11,11 @@
 // allocate objects in Unified Memory
 class Managed {
 public:
+
+    __host__ __device__
     void *operator new(size_t);
 
+    __host__ __device__
     void operator delete(void *);
 };
 

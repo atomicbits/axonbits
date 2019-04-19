@@ -4,6 +4,7 @@
 
 #include "Managed.cuh"
 
+__host__ __device__
 void *Managed::operator new(size_t len) {
     void *ptr;
     cudaMallocManaged(&ptr, len);
@@ -11,6 +12,7 @@ void *Managed::operator new(size_t len) {
     return ptr;
 }
 
+__host__ __device__
 void Managed::operator delete(void *ptr) {
     cudaDeviceSynchronize();
     cudaFree(ptr);

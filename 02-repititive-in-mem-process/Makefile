@@ -242,7 +242,7 @@ endif
 # Target rules
 all: build
 
-build: controller
+build: controller unittests
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -250,6 +250,15 @@ ifeq ($(SAMPLE_ENABLED),0)
 else
 	@echo "Sample is ready - all dependencies have been met"
 endif
+
+util/Array.o:util/Array.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
+test/util/ArrayTest.o:test/util/ArrayTest.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
+test/unittests.o:test/unittests.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
 controller.o:controller.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
@@ -269,7 +278,12 @@ Synapse.o:Synapse.cu
 NeuralNet.o:NeuralNet.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
-controller: Managed.o NeuralNet.o controller.o NeuronProperties.o Neuron.o Synapse.o
+controller: util/Array.o Managed.o NeuralNet.o controller.o NeuronProperties.o Neuron.o Synapse.o
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
+	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
+
+unittests: Managed.o test/util/ArrayTest.o test/unittests.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
@@ -277,8 +291,12 @@ controller: Managed.o NeuralNet.o controller.o NeuronProperties.o Neuron.o Synap
 run: build
 	$(EXEC) ./controller
 
+test: build
+	$(EXEC) ./unittests
+
 clean:
-	rm -f controller controller.o Managed.o NeuralNet.o Neuron.o Synapse.o NeuronProperties.o
+	rm -f util/Array.o controller controller.o Managed.o NeuralNet.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/util/ArrayTest.o
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/controller
+	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/unittests
 
 clobber: clean

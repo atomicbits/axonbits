@@ -23,17 +23,36 @@ public:
     // Destructor
     ~Neuron();
 
+    Neuron(unsigned long int neuronId, NeuronProperties* neuronProperties, unsigned int max_nb_incoming_synapses);
+
     // Get the id
     __host__ __device__
     unsigned long int getId() const;
+
+    __host__ __device__
+    float getActivity() const;
+
+    __host__ __device__
+    float getPreviousActivity() const;
+
+    __host__ __device__
+    float getLongTimeAverageActivity() const;
+
+//    __host__ __device__
+//    Synapse** getIncomingSynapses();
+
+    __host__ __device__
+    NeuronProperties* getProperties() const;
 
 private:
     unsigned long int id;
     float activity;
     float previous_activity;
-    float long_term_avg_activity;
-    Synapse *incoming_synapses[];
+    float long_time_avg_activity;
     NeuronProperties *properties;
+    Synapse* incoming_synapses;
+    unsigned int nb_synapses = 0;
+    unsigned int max_nb_synapses;
 };
 
 
