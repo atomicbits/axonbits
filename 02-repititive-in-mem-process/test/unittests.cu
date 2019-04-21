@@ -13,43 +13,46 @@
 
 
 __global__
-void run_test(ArrayTest *arrayTest) {
-    arrayTest->test();
+void run_device_test(ArrayTest *arrayTest) {
+    arrayTest->deviceTest();
+    return;
+}
+
+void run_host_test(ArrayTest *arrayTest) {
+    arrayTest->hostTest();
     return;
 }
 
 int launch_test(ArrayTest *arrayTest) {
 
-    int result = arrayTest->getResult();
-    printf("Result before is %i\n", result);
-
-    run_test<<< 1, 1 >>>(arrayTest);
+    run_device_test<<< 1, 1 >>>(arrayTest);
     cudaDeviceSynchronize();
-
 
     cudaError_t cudaError;
     cudaError = cudaGetLastError();
-    if(cudaError != cudaSuccess)
-    {
-        printf("  cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+    if(cudaError != cudaSuccess) {
+        printf("Device failure, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+
     }
 
+    if (arrayTest->getResult() == 0) {
+        printf("ArrayTest device test successful\n");
+    }
+    else {
+        printf("ArrayTest device test failed\n");
+        delete arrayTest;
+        return arrayTest->getResult();
+    }
 
-    result = arrayTest->getResult();
-    printf("Result after is %i\n", result);
+    run_host_test(arrayTest);
 
-    Array<TestContainer>* arr = arrayTest->getArray();
-    assert((*arr)[0]->getC() == 3.0); // should be 3.0!
-    assert((*arr)[2]->getZ() == 15); // should be 15!
-
-
-    if (result == 0)
-        printf("ArrayTest Successful\n");
+    if (arrayTest->getResult() == 0)
+        printf("ArrayTest host test successful\n");
     else
-        printf("ArrayTest Failed\n");
+        printf("ArrayTest host test failed\n");
 
+    int result = arrayTest->getResult();
     delete arrayTest;
-
     return result;
 }
 

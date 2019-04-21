@@ -14,6 +14,11 @@
 
 template<class T>
 
+/**
+ * An Array class that runs on host and device, keeps pointers to elements and whose internal array memory is managed.
+ *
+ * @tparam T
+ */
 class Array : public Managed {
 public:
 
@@ -29,7 +34,7 @@ public:
     __host__
     ~Array() {
         for(iterator i = begin(); i != end(); i++ ) {
-            delete *i;
+            delete *i; // i is the iterator, *i is where the iterator points to, which is a pointer to a T element.
         }
         cudaDeviceSynchronize();
         cudaFree(data);

@@ -70,12 +70,11 @@ class ArrayTest : public Managed {
 public:
 
     __host__
-    ArrayTest() {
+    ArrayTest() : result(0) {
         arr = new Array<TestContainer>(5);
         arr->append(new TestContainer(1.0, 2.0, 300.0, 1, 2, 100));
         arr->append(new TestContainer(4.0, 5.0, 6.0, 4, 5, 6));
         arr->append(new TestContainer(7.0, 8.0, 9.0, 7, 8, 9));
-        result = 5;
     }
 
     __host__
@@ -84,19 +83,24 @@ public:
     }
 
     __device__
-    void test() {
-
-        result = 14;
+    void deviceTest() {
 
         float ab = (*arr)[0]->addAB();
-        // assert(ab == 3.0);
-         (*arr)[0]->setC(ab);
-
+        assert(ab == 3.0);
+        (*arr)[0]->setC(ab);
 
         int xy = (*arr)[2]->addXY();
-        // assert(xy == 16); // should be 15!
+        assert(xy == 15); // should be 15!
         (*arr)[2]->setZ(xy);
 
+        result = 0;
+        return;
+    }
+
+    __host__
+    void hostTest() {
+        assert((*arr)[0]->getC() == 3.0); // should be 3.0!
+        assert((*arr)[2]->getZ() == 15); // should be 15!
         result = 0;
         return;
     }
