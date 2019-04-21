@@ -70,7 +70,7 @@ class ArrayTest : public Managed {
 public:
 
     __host__
-    ArrayTest() : result(0) {
+    ArrayTest() {
         arr = new Array<TestContainer>(5);
         arr->append(new TestContainer(1.0, 2.0, 300.0, 1, 2, 100));
         arr->append(new TestContainer(4.0, 5.0, 6.0, 4, 5, 6));
@@ -98,9 +98,9 @@ public:
             TestContainer* testContainer = *i;
             sum += testContainer->getC();
         }
+        // 3.0 + 6.0 + 9.0 = 18.0 (remember that (*arr)[0]->setC(3.0) above)
         assert(sum  == 18);
 
-        result = 0;
         return;
     }
 
@@ -108,13 +108,7 @@ public:
     void hostTest() {
         assert((*arr)[0]->getC() == 3.0); // should be 3.0!
         assert((*arr)[2]->getZ() == 15); // should be 15!
-        result = 0;
         return;
-    }
-
-    __host__
-    int getResult() {
-        return result;
     }
 
     __host__
@@ -123,7 +117,6 @@ public:
     }
 
 private:
-    int result;
     Array<TestContainer>* arr;
 
 };
