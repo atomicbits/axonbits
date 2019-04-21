@@ -90,13 +90,14 @@ public:
 
         float ab = (*arr)[0]->addAB();
         // assert(ab == 3.0);
-        // (*arr)[0]->setC(ab);
+         (*arr)[0]->setC(ab);
 
-//        int xy = (*arr)[2].addXY();
+
+        int xy = (*arr)[2]->addXY();
         // assert(xy == 16); // should be 15!
-//        (*arr)[2].setZ(xy);
+        (*arr)[2]->setZ(xy);
 
-        result = ab;
+        result = 0;
         return;
     }
 

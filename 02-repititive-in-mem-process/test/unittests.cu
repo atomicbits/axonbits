@@ -40,7 +40,7 @@ int launch_test(ArrayTest *arrayTest) {
 
     Array<TestContainer>* arr = arrayTest->getArray();
     assert((*arr)[0]->getC() == 3.0); // should be 3.0!
-    assert((*arr)[2]->getZ() == 9); // should be 15!
+    assert((*arr)[2]->getZ() == 15); // should be 15!
 
 
     if (result == 0)

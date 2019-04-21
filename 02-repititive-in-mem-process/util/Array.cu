@@ -83,7 +83,7 @@ public:
 
         __host__ __device__
         const T* operator*() const {
-            return **data;
+            return *data;
         }
 
         __host__ __device__
