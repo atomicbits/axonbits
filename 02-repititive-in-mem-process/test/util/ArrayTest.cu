@@ -88,7 +88,7 @@ public:
 
         result = 14;
 
-        float ab = (*arr)[0].addAB();
+        float ab = (*arr)[0]->addAB();
         // assert(ab == 3.0);
         // (*arr)[0]->setC(ab);
 

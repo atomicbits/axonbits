@@ -39,8 +39,8 @@ int launch_test(ArrayTest *arrayTest) {
     printf("Result after is %i\n", result);
 
     Array<TestContainer>* arr = arrayTest->getArray();
-    assert((*arr)[0].getC() == 3.0); // should be 3.0!
-    assert((*arr)[2].getZ() == 9); // should be 15!
+    assert((*arr)[0]->getC() == 3.0); // should be 3.0!
+    assert((*arr)[2]->getZ() == 9); // should be 15!
 
 
     if (result == 0)
