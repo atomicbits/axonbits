@@ -28,9 +28,9 @@ public:
     // Destructor
     __host__
     ~Array() {
-//        for(iterator i = begin(); i != end(); i++ ) {
-//            delete i;
-//        }
+        for(iterator i = begin(); i != end(); i++ ) {
+            delete *i;
+        }
         cudaDeviceSynchronize();
         cudaFree(data);
     }
@@ -76,10 +76,11 @@ public:
     //        cout << *i << " ";
     //    }
     class iterator {
-        const T** data;
+        T* const *data;
     public:
 
-        iterator(const T** arr) : data(arr) {}
+        __host__ __device__
+        iterator(T* const *arr) : data(arr) {}
 
         __host__ __device__
         const T* operator*() const {
@@ -100,8 +101,8 @@ public:
         }
 
         __host__ __device__
-        friend bool operator==(const iterator& rhs,const iterator& lhs) {
-            return rhs->data == lhs->data;
+        friend bool operator==(const iterator& rhs, const iterator& lhs) {
+            return rhs.data == lhs.data;
         }
 
         __host__ __device__
