@@ -64,12 +64,11 @@ public:
         return data[index];
     }
 
-//    __host__ __device__
-//    const T& operator[](int index) const {
-//        if(index<0 || index>=size) assert(0); // ToDo: exception handling on device, how?
-//        return data[index];
-//    }
-
+    __host__ __device__
+    const T& operator[](int index) const {
+        if(index<0 || index>=size) assert(0); // ToDo: exception handling on device, how?
+        return data[index];
+    }
 
     // iterator class
     // Mind that the iterator class is not Managed and its instantiation (begin() and end()) is not by the
@@ -88,7 +87,7 @@ public:
         iterator(T* const *arr) : data(arr) {}
 
         __host__ __device__
-        const T* operator*() const {
+        T* operator*() const {
             return *data;
         }
 

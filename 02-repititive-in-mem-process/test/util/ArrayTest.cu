@@ -93,6 +93,13 @@ public:
         assert(xy == 15); // should be 15!
         (*arr)[2]->setZ(xy);
 
+        float sum = 0;
+        for(Array<TestContainer>::iterator i = arr->begin(); i != arr->end(); i++) {
+            TestContainer* testContainer = *i;
+            sum += testContainer->getC();
+        }
+        assert(sum  == 18);
+
         result = 0;
         return;
     }

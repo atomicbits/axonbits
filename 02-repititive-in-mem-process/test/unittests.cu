@@ -28,11 +28,14 @@ int launch_test(ArrayTest *arrayTest) {
     run_device_test<<< 1, 1 >>>(arrayTest);
     cudaDeviceSynchronize();
 
+    int result;
     cudaError_t cudaError;
     cudaError = cudaGetLastError();
     if(cudaError != cudaSuccess) {
         printf("Device failure, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
-
+        result = arrayTest->getResult();
+        delete arrayTest;
+        return result;
     }
 
     if (arrayTest->getResult() == 0) {
@@ -40,8 +43,9 @@ int launch_test(ArrayTest *arrayTest) {
     }
     else {
         printf("ArrayTest device test failed\n");
+        result = arrayTest->getResult();
         delete arrayTest;
-        return arrayTest->getResult();
+        return result;
     }
 
     run_host_test(arrayTest);
@@ -51,7 +55,7 @@ int launch_test(ArrayTest *arrayTest) {
     else
         printf("ArrayTest host test failed\n");
 
-    int result = arrayTest->getResult();
+    result = arrayTest->getResult();
     delete arrayTest;
     return result;
 }
