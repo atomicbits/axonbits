@@ -82,6 +82,11 @@ public:
         delete arr;
     }
 
+    __host__
+    const char* getName() {
+        return "ArrayTest";
+    }
+
     __device__
     void deviceTest() {
 
