@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "../../Managed.cuh"
 #include "../../util/Array.cu"
+#include "../Test.cuh"
 
 
 class TestContainer : public Managed {
@@ -64,13 +65,14 @@ private:
 
 
 
-
-class ArrayTest : public Managed {
+class ArrayTest : public Managed, public Test {
 
 public:
 
+    // inline static const string TYPE = "ArrayTest";
+
     __host__
-    ArrayTest() {
+    ArrayTest() : Test(TestClass::arraytest) {
         arr = new Array<TestContainer>(5);
         arr->append(new TestContainer(1.0, 2.0, 300.0, 1, 2, 100));
         arr->append(new TestContainer(4.0, 5.0, 6.0, 4, 5, 6));

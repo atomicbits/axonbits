@@ -254,6 +254,9 @@ endif
 util/Array.o:util/Array.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
+test/Test.o:test/Test.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
 test/util/ArrayTest.o:test/util/ArrayTest.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
@@ -283,7 +286,7 @@ controller: util/Array.o Managed.o NeuralNet.o controller.o NeuronProperties.o N
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
-unittests: Managed.o test/util/ArrayTest.o test/unittests.o
+unittests: Managed.o test/Test.o test/util/ArrayTest.o test/unittests.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
@@ -295,7 +298,7 @@ test: build
 	$(EXEC) ./unittests
 
 clean:
-	rm -f util/Array.o controller unittests controller.o Managed.o NeuralNet.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/util/ArrayTest.o
+	rm -f util/Array.o controller unittests controller.o Managed.o NeuralNet.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/controller
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/unittests
 

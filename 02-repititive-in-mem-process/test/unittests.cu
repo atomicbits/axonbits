@@ -12,12 +12,12 @@
 #include "util/ArrayTest.cu"
 
 __global__
-void run_device_test(ArrayTest* test) {
+void run_device_test(Test* test) {
     test->deviceTest();
     return;
 }
 
-void run_host_test(ArrayTest* test) {
+void run_host_test(Test* test) {
     test->hostTest();
     return;
 }
@@ -32,7 +32,7 @@ void checkCudaErrors(const char* testName) {
     printf("%s device test successful\n", testName);
 }
 
-void launch_test(ArrayTest* test) {
+void launch_test(Test* test) {
 
     run_device_test<<< 1, 1 >>>(test);
     cudaDeviceSynchronize();
@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
 
     // A sad thing that we can't use polymorphism through virtual function calls when using unified memory!
     // Some ideas for workarounds: https://www.codeproject.com/Articles/603818/Cplusplus-Runtime-Polymorphism-without-Virtual-Fun
+    // But they all look nasty. Look how ugly it can get: https://stackoverflow.com/questions/22822836/type-switch-construct-in-c11
     ArrayTest* arrayTest = new ArrayTest();
     launch_test(arrayTest);
     delete arrayTest;
