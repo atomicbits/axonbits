@@ -4,27 +4,19 @@
 
 #include "Neuron.cuh"
 
-Neuron::Neuron() : id(0),
-                   activity(0),
-                   previous_activity(0),
-                   long_time_avg_activity(0) {}
-
-// Copy constructor
-Neuron::Neuron(const Neuron &neuron) : id(neuron.id),
-                                       activity(neuron.activity),
-                                       previous_activity(neuron.previous_activity),
-                                       long_time_avg_activity(neuron.long_time_avg_activity),
-                                       properties(neuron.properties) {}
-
-Neuron::~Neuron() {
-    // cudaFree(data); // free the pointers!
+Neuron::Neuron(unsigned long int neuronId,
+               NeuronProperties *neuronProperties,
+               unsigned int max_nb_incoming_synapses) :
+               id(neuronId),
+               properties(neuronProperties) {
+    incoming_synapses = new Array<Synapse>(max_nb_incoming_synapses);
 }
 
-Neuron::Neuron(unsigned long int neuronId, NeuronProperties *neuronProperties, unsigned int max_nb_incoming_synapses) :
-        id(neuronId),
-        properties(neuronProperties),
-        max_nb_synapses(max_nb_incoming_synapses) {
-    incoming_synapses = new Synapse[max_nb_incoming_synapses];
+Neuron::~Neuron() {
+    delete incoming_synapses;
+    // Pointers that we don't want to delete here are:
+    // * properties (because neuron properties are shared)
+
 }
 
 // Get the id
@@ -35,10 +27,25 @@ __host__ __device__
 float Neuron::getActivity() const { return activity; }
 
 __host__ __device__
+void Neuron::updateActivity(float activity_update) {
+    previous_activity = activity;
+    activity = activity_update;
+
+    // ToDo: update long_time_avg_activity
+}
+
+__host__ __device__
 float Neuron::getPreviousActivity() const { return previous_activity; }
 
 __host__ __device__
 float Neuron::getLongTimeAverageActivity() const { return long_time_avg_activity; }
 
 __host__ __device__
-NeuronProperties *Neuron::getProperties() const { return properties; }
+const NeuronProperties *Neuron::getProperties() const { return properties; }
+
+Array<Synapse>* Neuron::getIncomingSynapses() const { return incoming_synapses; }
+
+__host__ __device__
+void Neuron::addIncomingSynapse(Synapse* synapse) {
+    incoming_synapses->append(synapse);
+}

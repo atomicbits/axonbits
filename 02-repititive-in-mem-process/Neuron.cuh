@@ -8,22 +8,26 @@
 #include "Managed.cuh"
 #include "NeuronProperties.cuh"
 #include "Synapse.cuh"
+#include "util/Array.cu"
 
 class NeuronProperties; // forward declaration to cope with cyclic dependency
 class Synapse; // forward declaration to cope with cyclic dependency
 
 class Neuron : public Managed {
 public:
-    // Default Constructor
-    Neuron();
 
-    // Copy constructor
-    Neuron(const Neuron&);
+    /**
+     * Creates a memory managed neuron with the given id and neuron properties. It reserves the space to store
+     * max_nb_incoming_synapses number of synapse pointers in a managed array.
+     *
+     * @param neuronId
+     * @param neuronProperties
+     * @param max_nb_incoming_synapses
+     */
+    Neuron(unsigned long int neuronId, NeuronProperties* neuronProperties, unsigned int max_nb_incoming_synapses);
 
     // Destructor
     ~Neuron();
-
-    Neuron(unsigned long int neuronId, NeuronProperties* neuronProperties, unsigned int max_nb_incoming_synapses);
 
     // Get the id
     __host__ __device__
@@ -33,26 +37,30 @@ public:
     float getActivity() const;
 
     __host__ __device__
+    void updateActivity(float activity_update);
+
+    __host__ __device__
     float getPreviousActivity() const;
 
     __host__ __device__
     float getLongTimeAverageActivity() const;
 
-//    __host__ __device__
-//    Synapse** getIncomingSynapses();
+    __host__ __device__
+    Array<Synapse>* getIncomingSynapses() const;
 
     __host__ __device__
-    NeuronProperties* getProperties() const;
+    const NeuronProperties* getProperties() const;
+
+    __host__ __device__
+    void addIncomingSynapse(Synapse* synapse);
 
 private:
     unsigned long int id;
-    float activity;
-    float previous_activity;
-    float long_time_avg_activity;
-    NeuronProperties *properties;
-    Synapse* incoming_synapses;
-    unsigned int nb_synapses = 0;
-    unsigned int max_nb_synapses;
+    float activity; // y(t)
+    float previous_activity; // y(t-1)
+    float long_time_avg_activity; // y_l
+    const NeuronProperties* properties;
+    Array<Synapse>* incoming_synapses;
 };
 
 

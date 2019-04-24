@@ -40,6 +40,12 @@ public:
         cudaFree(data);
     }
 
+    /**
+     * append is a convenience method to incrementelly fill up an Array.
+     * Mind that it doesn't work in combination with set(...), because when using set it is assumed that the
+     * array content is managed by the onwer of the array (the size is assumed to be equal to largest index seen while
+     * setting the elements).
+     */
     __host__ __device__
     void append(T* element) {
         if (size == max_size) assert(0); // ToDo: exception handling on device, how? https://stackoverflow.com/questions/50755717/triggering-a-runtime-error-within-a-cuda-kernel ?
@@ -59,15 +65,24 @@ public:
 //    }
 
     __host__ __device__
-    T* operator[](int index) {
-        if(index<0 || index>=size) assert(0); // ToDo: exception handling on device, how?
+    T* operator[](unsigned int index) {
+        if(index>=max_size) assert(0); // ToDo: exception handling on device, how?
         return data[index];
     }
 
     __host__ __device__
-    const T& operator[](int index) const {
-        if(index<0 || index>=size) assert(0); // ToDo: exception handling on device, how?
+    const T& operator[](unsigned int index) const {
+        if(index>=max_size) assert(0); // ToDo: exception handling on device, how?
         return data[index];
+    }
+
+    __host__ __device__
+    void set(T* element, unsigned int index) {
+        if(index>=max_size) assert(0); // ToDo: exception handling on device, how?
+        data[index] = element;
+        if(index > size - 1) {
+            size = index + 1; // We set the size based on the largest seen index, assuming the owner fills it up without gaps!
+        }
     }
 
     // iterator class

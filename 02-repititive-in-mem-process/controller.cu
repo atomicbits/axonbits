@@ -50,7 +50,7 @@ void launch_generate_spikes(NeuralNet *elem) {
 int main(int argc, char **argv)
 {
 
-    NeuralNet *neuralNet = new NeuralNet();
+    NeuralNet *neuralNet = new NeuralNet(5);
 
     signal(SIGINT, &sig_handler);
 

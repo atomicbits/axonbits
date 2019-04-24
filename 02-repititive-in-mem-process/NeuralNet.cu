@@ -3,18 +3,36 @@
 //
 #include "NeuralNet.cuh"
 
-NeuralNet::NeuralNet() : length(0), data(0) {}
-
-// Constructor for C-string initializer
-NeuralNet::NeuralNet(const char *s) : length(0), data(0) {
+NeuralNet::NeuralNet(unsigned int maxNeurons_init)  {
+    neurons = new Array<Neuron>(maxNeurons_init);
 }
 
-// Copy constructor
-NeuralNet::NeuralNet(const NeuralNet &s) : length(0), data(0) {
+NeuralNet::~NeuralNet() {
+    delete neurons;
 }
 
-NeuralNet::~NeuralNet() { cudaFree(data); }
+__host__
+void NeuralNet::trial() {
 
-// Get the name
+}
+
+__host__
+void NeuralNet::getActivity(float[], unsigned int fromNeuronId, unsigned int toNeuronId) const {
+    return;
+}
+
+__host__
+void NeuralNet::updateActivity(float[], unsigned int fromNeuronId, unsigned int toNeuronId) {
+    return;
+}
+
 __host__ __device__
-char *NeuralNet::name() const { return data; }
+void cycle(const Phase phase) {
+    return;
+}
+
+__host__ __device__
+void updateWeights() {
+    return;
+}
+

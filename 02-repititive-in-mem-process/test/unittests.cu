@@ -22,21 +22,18 @@ void run_host_test(Test* test) {
     return;
 }
 
-void checkCudaErrors(const char* testName) {
+void launch_test(Test* test) {
+
+    run_device_test<<< 1, 1 >>>(test);
+    cudaDeviceSynchronize();
+
     cudaError_t cudaError;
     cudaError = cudaGetLastError();
     if(cudaError != cudaSuccess) {
         printf("Device failure, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
         return;
     }
-    printf("%s device test successful\n", testName);
-}
-
-void launch_test(Test* test) {
-
-    run_device_test<<< 1, 1 >>>(test);
-    cudaDeviceSynchronize();
-    checkCudaErrors(test->getName());
+    printf("%s device test successful\n", test->getName());
 
     run_host_test(test);
     printf("%s host test successful\n", test->getName());

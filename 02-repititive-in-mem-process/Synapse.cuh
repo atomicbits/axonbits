@@ -15,9 +15,6 @@ public:
     // Default Constructor
     Synapse();
 
-    // Copy constructor
-    Synapse(const Synapse&);
-
     // Destructor
     ~Synapse();
 
@@ -33,7 +30,7 @@ public:
 
     // Get the source
     __host__ __device__
-    Neuron* getSource();
+    Neuron* getSource() const;
 
 private:
     // The synapse weight
@@ -43,7 +40,7 @@ private:
     // x_m * y_m averaged during the first 75ms of each trial
     float medium_time_synaptic_activity;
     // The source neuron
-    Neuron *source; // get the source activity via this source neuron
+    Neuron* source; // get the source activity via this source neuron
 };
 
 
