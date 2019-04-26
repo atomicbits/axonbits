@@ -9,6 +9,9 @@
 #include "NeuronProperties.cuh"
 #include "Synapse.cuh"
 #include "util/Array.cu"
+#include "Phase.cu"
+#include "CycleParity.cu"
+
 
 class NeuronProperties; // forward declaration to cope with cyclic dependency
 class Synapse; // forward declaration to cope with cyclic dependency

@@ -272,6 +272,12 @@ Managed.o:Managed.cu
 NeuronProperties.o:NeuronProperties.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
+CycleParity.o:CycleParity.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
+Phase.o:Phase.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
 Neuron.o:Neuron.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
@@ -284,7 +290,7 @@ Layer.o:Layer.cu
 NeuralNet.o:NeuralNet.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
-controller: util/Array.o Managed.o NeuralNet.o Layer.o controller.o NeuronProperties.o Neuron.o Synapse.o
+controller: util/Array.o Managed.o NeuralNet.o Layer.o controller.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
