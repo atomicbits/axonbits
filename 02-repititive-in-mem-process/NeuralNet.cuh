@@ -7,6 +7,7 @@
 
 #include "Managed.cuh"
 #include "Neuron.cuh"
+#include "Synapse.cuh"
 #include "util/Array.cu"
 #include "Phase.cu"
 #include "CycleParity.cu"
@@ -52,17 +53,11 @@ public:
     __host__
     void updateActivity(float activity[], unsigned int fromNeuronId, unsigned int toNeuronId);
 
-    __host__
-    void cycle(const Phase phase, const CycleParity parity);
-
 
 private:
 
-//    __global__
-//    void cycleParallelized(const Phase phase, const CycleParity parity);
-
-//    __device__
-//    void updateNeuronActivity(Neuron* neuron, const Phase phase, const CycleParity parity);
+    __host__
+    void cycle(const Phase phase, const CycleParity parity);
 
     __host__
     void updateWeights();

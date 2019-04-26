@@ -95,8 +95,9 @@ public:
     // 'new' operator. This is because an iterator is only supposed to be used on thread stack memory!
     //
     // Use:
-    // for (i = arr.begin(); i != arr.end(); ++i)
+    // for (Array<T>::iterator i = arr.begin(); i != arr.end(); ++i)
     //    {
+    //        T* t = *i;
     //        cout << *i << " ";
     //    }
     class iterator {
