@@ -29,9 +29,6 @@ public:
     ~NeuralNet();
 
     __host__
-    void neuralLoop();
-
-    __host__
     void trial();
 
     /**
@@ -45,7 +42,8 @@ public:
     void getActivity(float activity[], unsigned int fromNeuronId, unsigned int toNeuronId) const;
 
     /**
-     * Update the activity of all neurons from id 'fromNeuronId' to id 'toNeuronId'.
+     * Update the activity of all neurons from id 'fromNeuronId' to id 'toNeuronId'. It updates both the
+     * even and the odd cycle parity activity value (because it is meant to be used as external input).
      *
      * @param activity the array containing the activity to update in the successive neurons
      * @param fromNeuronId the from neuron id
@@ -54,11 +52,17 @@ public:
     __host__
     void updateActivity(float activity[], unsigned int fromNeuronId, unsigned int toNeuronId);
 
+    __host__
+    void cycle(const Phase phase, const CycleParity parity);
+
 
 private:
 
-    __host__
-    void cycle(const Phase phase, const CycleParity parity);
+//    __global__
+//    void cycleParallelized(const Phase phase, const CycleParity parity);
+
+//    __device__
+//    void updateNeuronActivity(Neuron* neuron, const Phase phase, const CycleParity parity);
 
     __host__
     void updateWeights();

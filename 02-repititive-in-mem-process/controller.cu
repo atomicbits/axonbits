@@ -50,14 +50,18 @@ void launch_generate_spikes(NeuralNet *elem) {
 int main(int argc, char **argv)
 {
 
-    NeuralNet *neuralNet = new NeuralNet(5);
+    NeuralNet* neuralNet = new NeuralNet(5);
 
     signal(SIGINT, &sig_handler);
 
     while (g_running) {
-        launch_add_input_spikes(neuralNet);
-        launch_push_spikes(neuralNet);
-        launch_generate_spikes(neuralNet);
+        // neuralNet->updateActivity();
+        neuralNet->trial();
+        // neuralNet->getActivity();
+
+//        launch_add_input_spikes(neuralNet);
+//        launch_push_spikes(neuralNet);
+//        launch_generate_spikes(neuralNet);
     }
 
     printf("exiting safely\n");

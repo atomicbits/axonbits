@@ -24,18 +24,27 @@ __host__ __device__
 unsigned long int Neuron::getId() const { return id; }
 
 __host__ __device__
-float Neuron::getActivity() const { return activity; }
+float Neuron::getActivity(CycleParity parity) const {
+    if(parity == EvenCycle) return activity_even_parity;
+    else return activity_odd_parity;
+}
 
 __host__ __device__
-void Neuron::updateActivity(float activity_update) {
-    previous_activity = activity;
-    activity = activity_update;
+void Neuron::updateActivity(float activity_update, CycleParity parity) {
+    if(parity == EvenCycle) {
+        activity_odd_parity = activity_update;
+    } else {
+        activity_even_parity = activity_update;
+    }
 
     // ToDo: update long_time_avg_activity
 }
 
-__host__ __device__
-float Neuron::getPreviousActivity() const { return previous_activity; }
+__host__
+void Neuron::setExternalActivity(float activity_update) {
+    activity_even_parity = activity_update;
+    activity_odd_parity = activity_update;
+}
 
 __host__ __device__
 float Neuron::getLongTimeAverageActivity() const { return long_time_avg_activity; }

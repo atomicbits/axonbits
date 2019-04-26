@@ -85,6 +85,11 @@ public:
         }
     }
 
+    __host__ __device__
+    unsigned int getSize() {
+        return size;
+    }
+
     // iterator class
     // Mind that the iterator class is not Managed and its instantiation (begin() and end()) is not by the
     // 'new' operator. This is because an iterator is only supposed to be used on thread stack memory!
