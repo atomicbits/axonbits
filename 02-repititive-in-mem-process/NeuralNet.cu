@@ -86,7 +86,11 @@ void cycleParallelized(Array<Neuron>* neurons, const Phase phase, const CyclePar
 // = = =
 
 
-NeuralNet::NeuralNet(unsigned int maxNeurons_init)  {
+NeuralNet::NeuralNet(unsigned int maxNeurons_init) {
+    max_nb_of_threads = 256;
+    max_nb_of_blocks = 4096;
+    nb_of_threads = max_nb_of_threads;
+    nb_of_blocks = max_nb_of_blocks;
     neurons = new Array<Neuron>(maxNeurons_init);
 }
 
@@ -122,7 +126,8 @@ void NeuralNet::cycle(const Phase phase, const CycleParity parity) {
     // ToDo: see which number of blocks and block size work best...
     // Test with block size of 1024 (i.e. number of threads per block).
     // Mind that cycleParallelized(...) must be called as a function, not a method! CUDA constraint...
-    cycleParallelized<<<4096,256>>>(neurons, phase, parity);
+
+    cycleParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, phase, parity);
     cudaDeviceSynchronize();
 
     cudaError_t cudaError;
@@ -143,4 +148,19 @@ __host__
 CycleParity NeuralNet::getParity(int i) {
     if(i % 2 == 0) return EvenCycle;
     else return OddCycle;
+}
+
+__host__
+void NeuralNet::initThreadBlocks() {
+    unsigned int nb_of_neurons = neurons->getSize();
+    if (nb_of_neurons < max_nb_of_threads) {
+        nb_of_threads =  nb_of_neurons;
+        nb_of_blocks = 1;
+    } else if (nb_of_neurons / max_nb_of_threads < max_nb_of_blocks) {
+        if (nb_of_neurons % max_nb_of_threads == 0) {
+            nb_of_blocks = nb_of_neurons / max_nb_of_threads;
+        } else {
+            nb_of_blocks = (nb_of_neurons / max_nb_of_threads) + 1;
+        }
+    }
 }

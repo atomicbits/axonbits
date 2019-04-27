@@ -53,6 +53,8 @@ public:
     __host__
     void updateActivity(float activity[], unsigned int fromNeuronId, unsigned int toNeuronId);
 
+    __host__
+    void initThreadBlocks();
 
 private:
 
@@ -70,6 +72,12 @@ private:
      * There is a one-to-one map between the id of each neuron and their index in the array.
      */
     Array<Neuron>* neurons;
+
+    int nb_of_threads; // number of threads per block
+    int nb_of_blocks;  // number of blocks
+
+    int max_nb_of_threads; // max number of threads per block
+    int max_nb_of_blocks;  // max number of blocks
 
 };
 

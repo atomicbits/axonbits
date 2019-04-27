@@ -51,6 +51,8 @@ int main(int argc, char **argv)
 {
 
     NeuralNet* neuralNet = new NeuralNet(5);
+    // ToDo build up neural net here
+    neuralNet->initThreadBlocks();
 
     signal(SIGINT, &sig_handler);
 
