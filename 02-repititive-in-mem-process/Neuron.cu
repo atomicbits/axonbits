@@ -6,14 +6,17 @@
 
 Neuron::Neuron(unsigned long int neuronId,
                NeuronProperties *neuronProperties,
-               unsigned int max_nb_incoming_synapses) :
+               unsigned int max_nb_incoming_excitatory_synapses,
+               unsigned int max_nb_incoming_inhibitory_synapses) :
                id(neuronId),
                properties(neuronProperties) {
-    incoming_synapses = new Array<Synapse>(max_nb_incoming_synapses);
+    incoming_excitatory_synapses = new Array<Synapse>(max_nb_incoming_excitatory_synapses);
+    incoming_inhibitory_synapses = new Array<Synapse>(max_nb_incoming_inhibitory_synapses);
 }
 
 Neuron::~Neuron() {
-    delete incoming_synapses;
+    delete incoming_excitatory_synapses;
+    delete incoming_inhibitory_synapses;
     // Pointers that we don't want to delete here are:
     // * properties (because neuron properties are shared)
 
@@ -22,6 +25,9 @@ Neuron::~Neuron() {
 // Get the id
 __host__ __device__
 unsigned long int Neuron::getId() const { return id; }
+
+__host__ __device__
+const NeuronProperties *Neuron::getProperties() const { return properties; }
 
 __host__ __device__
 float Neuron::getActivity(CycleParity parity) const {
@@ -49,12 +55,21 @@ void Neuron::setExternalActivity(float activity_update) {
 __host__ __device__
 float Neuron::getLongTimeAverageActivity() const { return long_time_avg_activity; }
 
-__host__ __device__
-const NeuronProperties *Neuron::getProperties() const { return properties; }
+Array<Synapse>* Neuron::getIncomingExcitatorySynapses() const {
+    return incoming_excitatory_synapses;
+}
 
-Array<Synapse>* Neuron::getIncomingSynapses() const { return incoming_synapses; }
+__host__ __device__
+void Neuron::addIncomingExcitatorySynapse(Synapse* synapse) {
+    incoming_excitatory_synapses->append(synapse);
+}
 
 __host__ __device__
-void Neuron::addIncomingSynapse(Synapse* synapse) {
-    incoming_synapses->append(synapse);
+Array<Synapse>* Neuron::getIncomingInhibitorySynapses() const {
+    return incoming_inhibitory_synapses;
+}
+
+__host__ __device__
+void Neuron::addIncomingInhibitorySynapse(Synapse* synapse) {
+    incoming_inhibitory_synapses->append(synapse);
 }

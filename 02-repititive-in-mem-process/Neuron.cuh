@@ -27,7 +27,10 @@ public:
      * @param neuronProperties
      * @param max_nb_incoming_synapses
      */
-    Neuron(unsigned long int neuronId, NeuronProperties* neuronProperties, unsigned int max_nb_incoming_synapses);
+    Neuron(unsigned long int neuronId,
+            NeuronProperties* neuronProperties,
+            unsigned int max_nb_incoming_excitatory_synapses,
+            unsigned int max_nb_incoming_inhibitory_synapses);
 
     // Destructor
     ~Neuron();
@@ -37,6 +40,9 @@ public:
     unsigned long int getId() const;
 
     __host__ __device__
+    const NeuronProperties* getProperties() const;
+
+    __host__ __device__
     float getActivity(CycleParity parity) const;
 
     /**
@@ -44,6 +50,11 @@ public:
      * This does not override the current activity while in this cycle! So, getActivity(currentCycleParity) will
      * return the same value before and after updateActivity(...) !!! The updated activity will be used as the
      * current activity in the next cycle.
+     *
+     * The effect of this way of handling the activity updates using cycle parity is that the single thread that does
+     * the update of the activity during a cycle will not collide with the threads that request the current (old) value
+     * of the neuron's activity to calculate the average input activity in all the neurons that receive from this
+     * neuron. So it effectively isolates thread update activity, so avoiding all kinds of synchronization issues.
      */
     __host__ __device__
     void updateActivity(float activity_update, CycleParity parity);
@@ -60,13 +71,16 @@ public:
     float getLongTimeAverageActivity() const;
 
     __host__ __device__
-    Array<Synapse>* getIncomingSynapses() const;
+    Array<Synapse>* getIncomingExcitatorySynapses() const;
 
     __host__ __device__
-    const NeuronProperties* getProperties() const;
+    void addIncomingExcitatorySynapse(Synapse* synapse);
 
     __host__ __device__
-    void addIncomingSynapse(Synapse* synapse);
+    Array<Synapse>* getIncomingInhibitorySynapses() const;
+
+    __host__ __device__
+    void addIncomingInhibitorySynapse(Synapse* synapse);
 
 private:
     unsigned long int id;
@@ -82,7 +96,8 @@ private:
     float activity_odd_parity;  // either y(t) or y(t-1) depending on the current cycle parity
     float long_time_avg_activity; // y_l
     const NeuronProperties* properties;
-    Array<Synapse>* incoming_synapses;
+    Array<Synapse>* incoming_excitatory_synapses;
+    Array<Synapse>* incoming_inhibitory_synapses;
 };
 
 

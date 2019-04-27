@@ -20,8 +20,7 @@ float positivePart(float x) {
  * g_e(t) = 1/n * sum_i(x_i(t) * w_i)
  */
 __device__
-float avgExcitatoryInputActivity(Neuron* neuron, const Phase phase, const CycleParity parity) {
-    Array<Synapse>* synapses = neuron->getIncomingSynapses();
+float avgyInputActivity(Array<Synapse>* synapses, const CycleParity parity) {
     int number = 0;
     float sum = 0.0;
     for(Array<Synapse>::iterator i = synapses->begin(); i != synapses->end(); ++i) {
@@ -31,14 +30,16 @@ float avgExcitatoryInputActivity(Neuron* neuron, const Phase phase, const CycleP
         sum += activity * weight;
         ++number;
     }
-    return sum / (float)number;
+    if(number == 0) return 0.0;
+    else return sum / (float)number;
 }
 
 __device__
 void updateNeuronActivity(Neuron* neuron, const Phase phase, const CycleParity parity) {
 
     // Normalized neuron parameters
-    // ToDo: move them to the NeuronProperties 
+    // See: https://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Main
+    // ToDo: move them to the NeuronProperties
     float E_e = 1.0; // excitatory driving potential, bio val: 0mV
     float E_i = 0.25; // inhibitory driving potential, bio val: -75mV
     float E_l = 0.3; // leak driving potential, bio val: -70mV
@@ -51,12 +52,12 @@ void updateNeuronActivity(Neuron* neuron, const Phase phase, const CycleParity p
 
     // g_i_rel should be calculated as defined in FFFB inhibition function, or a better and more local way?
     // can we use local inhibition neurons to replace FFFB in a simple way?
-    float g_i_rel = 0.3; // ToDo: find a way to get g_i_rel... 0.3 is just a placeholder for now.
+    float g_i_rel = avgyInputActivity(neuron->getIncomingInhibitorySynapses(), parity);
     float g_i = g_bar_i * g_i_rel;
 
     float g_e_theta = (g_i * (E_i - theta) + g_l * (E_l - theta)) / (theta - E_e);
 
-    float g_e_rel = avgExcitatoryInputActivity(neuron, phase, parity); // g_e_rel = g_e(t) = 1/n * sum_i(x_i(t) * w_i)
+    float g_e_rel = avgyInputActivity(neuron->getIncomingExcitatorySynapses(), parity); // g_e_rel = g_e(t) = 1/n * sum_i(x_i(t) * w_i)
     float g_e = g_bar_e * g_e_rel;
 
     float y_current = neuron->getActivity(parity);
