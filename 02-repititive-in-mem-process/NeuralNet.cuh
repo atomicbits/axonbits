@@ -29,6 +29,21 @@ public:
     // Destructor
     ~NeuralNet();
 
+    /**
+     * Adds a neuron to this neural net.
+     *
+     * Important!!!
+     * The index of this neuron in the 'neurons' array will be the same as the id of this neuron!!!
+     * ALWAYS make sure to fill up the 'neurons' array entirely without gaps up to a max neuron id. This max neuron id
+     * must be smaller than or equal to the maximum number of neurons allowed in this neural net. This maximum allowed
+     * number of neurons is set during construction using 'maxNeurons_init' variable in the constructor.
+     * If the largest neuron id (or the largest used index in the 'neurons' array) is not preceded with neurons with a
+     * continuous id, from 0 up to this largest neuron id, then the neural net will fail with a memory access error.
+     * 
+     */
+    __host__
+    void addNeuron(Neuron* neuron);
+
     __host__
     void trial();
 
@@ -76,8 +91,8 @@ private:
     int nb_of_threads; // number of threads per block
     int nb_of_blocks;  // number of blocks
 
-    int max_nb_of_threads; // max number of threads per block
-    int max_nb_of_blocks;  // max number of blocks
+    const int max_nb_of_threads; // max number of threads per block
+    const int max_nb_of_blocks;  // max number of blocks
 
 };
 

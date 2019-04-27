@@ -4,7 +4,7 @@
 #include <stdio.h> // Needed for printf.
 #include "NeuralNet.cuh"
 
-// = = =
+// = = = = = = = = = = = = = = = = = =
 // Some functions defined on the global scope (because calling OO methods as parallel CUDA function doesn't work).
 // See: https://stackoverflow.com/questions/40558908/cuda-illegal-combination-of-memory-qualifiers
 // PS: This remark has nothing to do with the __global__ qualifier below, that's CUDA stuff. Defining functions on the
@@ -83,12 +83,11 @@ void cycleParallelized(Array<Neuron>* neurons, const Phase phase, const CyclePar
 
 
 // End of globally scoped functions
-// = = =
+// = = = = = = = = = = = = = = = = = =
 
 
-NeuralNet::NeuralNet(unsigned int maxNeurons_init) {
-    max_nb_of_threads = 256;
-    max_nb_of_blocks = 4096;
+
+NeuralNet::NeuralNet(unsigned int maxNeurons_init) : max_nb_of_threads(256), max_nb_of_blocks(4096) {
     nb_of_threads = max_nb_of_threads;
     nb_of_blocks = max_nb_of_blocks;
     neurons = new Array<Neuron>(maxNeurons_init);
