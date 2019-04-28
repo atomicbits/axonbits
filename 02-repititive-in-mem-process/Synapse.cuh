@@ -22,12 +22,6 @@ public:
     __host__ __device__
     float getWeight() const;
 
-    __host__ __device__
-    float getShortTimeSynapticActivity() const;
-
-    __host__ __device__
-    float getMediumTimeSynapicActivity() const;
-
     // Get the source
     __host__ __device__
     Neuron* getSource() const;
@@ -35,10 +29,6 @@ public:
 private:
     // The synapse weight
     float weight;
-    // x_s * y_s averaged during the last 25ms (during the last quarter of a trial)
-    float short_time_synaptic_activity;
-    // x_m * y_m averaged during the first 75ms of each trial
-    float medium_time_synaptic_activity;
     // The source neuron
     Neuron* source; // get the source activity via this source neuron
 };

@@ -67,8 +67,37 @@ public:
     __host__
     void setExternalActivity(float activity_update);
 
+    /**
+     * Get the short time average activity based on the length of te fourth quarter cycles.
+     * This value only makes sense after the end of the fourth quarter cycles.
+     */
+    __host__ __device__
+    float getShortTimeAverageActivity(const int fourthQuarterLength) const;
+
+    __device__
+    void resetShortTimeSumActivity();
+
+    __device__
+    void incrementShortTimeSumActivity(const float activity);
+
+    /**
+     * Get the medium time average activity based on the length of the first three quarter cycles.
+     * This value only makes sense after the end of the first three quarter cycles.
+     */
+    __host__ __device__
+    float getMediumTimeAverageActivity(const int threeQuarterLength) const;
+
+    __device__
+    void resetMediumTimeSumActivity();
+
+    __device__
+    void incrementMediumTimeSumActivity(const float activity);
+
     __host__ __device__
     float getLongTimeAverageActivity() const;
+
+    __device__
+    void incrementLongTimeAverageActivity(const float activity, const float alpha);
 
     __host__ __device__
     Array<Synapse>* getIncomingExcitatorySynapses() const;
@@ -84,6 +113,7 @@ public:
 
 private:
     unsigned long int id;
+    const NeuronProperties* properties;
     /**
      * y(t-1) is the current activity, which was calculated in the previous cycle.
      * y(t-1) will be used in the calculation of g_e(t) = 1/n sum_i(x_i(t-1)*w_i), where x_i(t-1) is the previously
@@ -94,9 +124,15 @@ private:
      */
     float activity_even_parity; // either y(t) or y(t-1) depending on the current cycle parity
     float activity_odd_parity;  // either y(t) or y(t-1) depending on the current cycle parity
-    float long_time_avg_activity; // y_l
-    const NeuronProperties* properties;
+    // y_s averaged during the last 25ms (during the last quarter of a trial)
+    float short_time_sum_activity;
+    // y_m averaged during the first 75ms of each trial
+    float medium_time_sum_activity;
+    // y_l averaged using running exponential average
+    float long_time_avg_activity;
+    // incoming excitatory synapses
     Array<Synapse>* incoming_excitatory_synapses;
+    // incoming inhibitory synapses
     Array<Synapse>* incoming_inhibitory_synapses;
 };
 

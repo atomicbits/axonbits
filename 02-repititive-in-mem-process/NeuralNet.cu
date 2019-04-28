@@ -20,7 +20,7 @@ float positivePart(float x) {
  * g_e(t) = 1/n * sum_i(x_i(t) * w_i)
  */
 __device__
-float avgyInputActivity(Array<Synapse>* synapses, const CycleParity parity) {
+float avgInputActivity(Array<Synapse>* synapses, const CycleParity parity) {
     int number = 0;
     float sum = 0.0;
     for(Array<Synapse>::iterator i = synapses->begin(); i != synapses->end(); ++i) {
@@ -35,7 +35,46 @@ float avgyInputActivity(Array<Synapse>* synapses, const CycleParity parity) {
 }
 
 __device__
-void updateNeuronActivity(Neuron* neuron, const Phase phase, const CycleParity parity) {
+void initPhase(Neuron* neuron, const Phase phase) {
+    if (phase == ExpectationPhase) {
+        neuron->resetMediumTimeSumActivity();
+    } else if (phase == OutcomePhase) {
+        neuron->resetShortTimeSumActivity();
+    }
+}
+
+/**
+ * XCAL dWt function
+ */
+__device__
+float XCALdWt(const float xy, const float theta_p) {
+    float theta_d = 0.1;
+    if (xy > theta_p * theta_d) {
+        return xy - theta_p;
+    } else {
+        return - xy * (1 - theta_d) / theta_d;
+    }
+}
+
+__device__
+void updateIncomingSynapsesWeights(Neuron* neuron, const CycleParity parity) {
+
+
+
+    // ToDo: update the neuron's short_time_avg_activity
+    // x_s * y_s averaged during the last 25ms (during the last quarter of a trial)
+    // ToDo: update the neuron's medium_time_avg_activity
+    // x_m * y_m averaged during the first 75ms of each trial
+    // ToDo: update the neuron's long_time_avg_activity
+    // y_l
+}
+
+__device__
+void updateNeuronActivity(Neuron* neuron, const Phase phase, const bool beginOfPhase, const CycleParity parity) {
+
+    if (beginOfPhase) {
+        initPhase(neuron, phase);
+    }
 
     // Normalized neuron parameters
     // See: https://grey.colorado.edu/CompCogNeuro/index.php/CCNBook/Main
@@ -52,12 +91,12 @@ void updateNeuronActivity(Neuron* neuron, const Phase phase, const CycleParity p
 
     // g_i_rel should be calculated as defined in FFFB inhibition function, or a better and more local way?
     // can we use local inhibition neurons to replace FFFB in a simple way?
-    float g_i_rel = avgyInputActivity(neuron->getIncomingInhibitorySynapses(), parity);
+    float g_i_rel = avgInputActivity(neuron->getIncomingInhibitorySynapses(), parity);
     float g_i = g_bar_i * g_i_rel;
 
     float g_e_theta = (g_i * (E_i - theta) + g_l * (E_l - theta)) / (theta - E_e);
 
-    float g_e_rel = avgyInputActivity(neuron->getIncomingExcitatorySynapses(), parity); // g_e_rel = g_e(t) = 1/n * sum_i(x_i(t) * w_i)
+    float g_e_rel = avgInputActivity(neuron->getIncomingExcitatorySynapses(), parity); // g_e_rel = g_e(t) = 1/n * sum_i(x_i(t) * w_i)
     float g_e = g_bar_e * g_e_rel;
 
     float y_current = neuron->getActivity(parity);
@@ -65,10 +104,19 @@ void updateNeuronActivity(Neuron* neuron, const Phase phase, const CycleParity p
     float y = y_current + dt_vm * (y_star - y_current); // new activity for the neuron
 
     neuron->updateActivity(y, parity);
+
+    if (phase == ExpectationPhase) {
+        neuron->incrementMediumTimeSumActivity(y);
+    } else if (phase == OutcomePhase) {
+        neuron->incrementShortTimeSumActivity(y);
+    }
+    float alpha = 0.05;
+    neuron->incrementLongTimeAverageActivity(y, alpha);
+
 }
 
 __global__
-void cycleParallelized(Array<Neuron>* neurons, const Phase phase, const CycleParity parity) {
+void cycleParallelized(Array<Neuron>* neurons, const Phase phase, const bool beginOfPhase, const CycleParity parity) {
     // Using the popular grid-stride loop
     // see: https://devblogs.nvidia.com/even-easier-introduction-cuda/
     // see: https://devblogs.nvidia.com/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/
@@ -77,7 +125,18 @@ void cycleParallelized(Array<Neuron>* neurons, const Phase phase, const CyclePar
     unsigned int nbOfNeurons = neurons->getSize();
     for (int i = index; i < nbOfNeurons; i += stride) {
         Neuron* neuron = (*neurons)[i];
-        updateNeuronActivity(neuron, phase, parity);
+        updateNeuronActivity(neuron, phase, beginOfPhase, parity);
+    }
+}
+
+__global__
+void updateWeightsParallelized(Array<Neuron>* neurons, const CycleParity parity) {
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+    unsigned int nbOfNeurons = neurons->getSize();
+    for (int i = index; i < nbOfNeurons; i += stride) {
+        Neuron* neuron = (*neurons)[i];
+        updateIncomingSynapsesWeights(neuron, parity);
     }
 }
 
@@ -100,12 +159,15 @@ NeuralNet::~NeuralNet() {
 __host__
 void NeuralNet::trial() {
     for (int i = 0; i < 75; i++) {
-        cycle(ExpectationPhase, getParity(i));
+        bool beginOfPhase = i == 0;
+        cycle(ExpectationPhase, beginOfPhase, getParity(i));
     }
     for (int i = 75; i < 100; i++) {
-        cycle(OutcomePhase, getParity(i));
+        bool beginOfPhase = i == 75;
+        cycle(OutcomePhase, beginOfPhase, getParity(i));
     }
-    updateWeights(); // Could this be done in parallel with reading the neural net output signals and writing the new input signals?
+    // The cycle containing the last updated activities is one cycle after the last one, which was an OddCycle.
+    updateWeights(EvenCycle); // Could this be done in parallel with reading the neural net output signals and writing the new input signals?
 }
 
 __host__
@@ -120,25 +182,34 @@ void NeuralNet::updateActivity(float activity[], unsigned int fromNeuronId, unsi
 }
 
 __host__
-void NeuralNet::cycle(const Phase phase, const CycleParity parity) {
+void NeuralNet::cycle(const Phase phase, const bool beginOfPhase, const CycleParity parity) {
     // Divide the neurons over a whole bunch of threads and get them to work...
     // ToDo: see which number of blocks and block size work best...
     // Test with block size of 1024 (i.e. number of threads per block).
     // Mind that cycleParallelized(...) must be called as a function, not a method! CUDA constraint...
 
-    cycleParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, phase, parity);
+    cycleParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, phase, beginOfPhase, parity);
     cudaDeviceSynchronize();
 
     cudaError_t cudaError;
     cudaError = cudaGetLastError();
     if(cudaError != cudaSuccess) {
-        printf("Device failure, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+        printf("Device failure during activation update cycles, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
     }
 }
 
 __host__
-void NeuralNet::updateWeights() {
+void NeuralNet::updateWeights(const CycleParity parity) {
     // Divide the neurons over a whole bunch of threads and get them to work...
+
+    updateWeightsParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, parity);
+    cudaDeviceSynchronize();
+
+    cudaError_t cudaError;
+    cudaError = cudaGetLastError();
+    if(cudaError != cudaSuccess) {
+        printf("Device failure during weight updating, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+    }
 
     return;
 }

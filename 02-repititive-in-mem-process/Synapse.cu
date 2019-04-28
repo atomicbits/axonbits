@@ -5,9 +5,7 @@
 #include "Synapse.cuh"
 
 // Default Constructor
-Synapse::Synapse() : weight(0.5),
-                     short_time_synaptic_activity(0),
-                     medium_time_synaptic_activity(0) {}
+Synapse::Synapse() : weight(0.5) {}
 
 // Destructor
 Synapse::~Synapse() {
@@ -20,11 +18,6 @@ Synapse::~Synapse() {
 __host__ __device__
 float Synapse::getWeight() const { return weight; }
 
-__host__ __device__
-float Synapse::getShortTimeSynapticActivity() const { return short_time_synaptic_activity; }
-
-__host__ __device__
-float Synapse::getMediumTimeSynapicActivity() const { return medium_time_synaptic_activity; }
 
 // Get the source
 __host__ __device__

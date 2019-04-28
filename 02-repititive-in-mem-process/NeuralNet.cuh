@@ -39,7 +39,7 @@ public:
      * number of neurons is set during construction using 'maxNeurons_init' variable in the constructor.
      * If the largest neuron id (or the largest used index in the 'neurons' array) is not preceded with neurons with a
      * continuous id, from 0 up to this largest neuron id, then the neural net will fail with a memory access error.
-     * 
+     *
      */
     __host__
     void addNeuron(Neuron* neuron);
@@ -74,10 +74,10 @@ public:
 private:
 
     __host__
-    void cycle(const Phase phase, const CycleParity parity);
+    void cycle(const Phase phase, const bool beginOfPhase, const CycleParity parity);
 
     __host__
-    void updateWeights();
+    void updateWeights(const CycleParity parity);
 
     __host__
     CycleParity getParity(int i);
