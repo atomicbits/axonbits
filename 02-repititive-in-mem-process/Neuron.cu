@@ -45,8 +45,6 @@ void Neuron::updateActivity(float activity_update, CycleParity parity) {
     } else {
         activity_even_parity = activity_update;
     }
-
-    // ToDo: update long_time_avg_activity
 }
 
 __host__
@@ -91,6 +89,11 @@ float Neuron::getLongTimeAverageActivity() const {
     return long_time_avg_activity;
 }
 
+/**
+ * We only have to increment this activity once per trial.
+ * We use the average on the last quarter as an approximation to update the long time average with (not sure yet
+ * if this is a good idea).
+ */
 __device__
 void Neuron::incrementLongTimeAverageActivity(const float activity, const float alpha) {
     // y_l = y_l + alpha * (y - y_l)

@@ -71,10 +71,13 @@ public:
     __host__
     void initThreadBlocks();
 
+    const int expectationPhaseDuration = 75;
+    const int outcomePhaseDuration = 25;
+
 private:
 
     __host__
-    void cycle(const Phase phase, const bool beginOfPhase, const CycleParity parity);
+    void cycle(const Phase phase, const bool beginOfPhase, const bool endOfPhase, const CycleParity parity);
 
     __host__
     void updateWeights(const CycleParity parity);

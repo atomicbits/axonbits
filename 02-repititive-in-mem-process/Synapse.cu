@@ -18,6 +18,10 @@ Synapse::~Synapse() {
 __host__ __device__
 float Synapse::getWeight() const { return weight; }
 
+__host__ __device__
+void Synapse::updateWeight(const float weight_update) {
+    weight = weight_update;
+}
 
 // Get the source
 __host__ __device__

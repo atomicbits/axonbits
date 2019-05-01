@@ -34,15 +34,6 @@ float avgInputActivity(Array<Synapse>* synapses, const CycleParity parity) {
     else return sum / (float)number;
 }
 
-__device__
-void initPhase(Neuron* neuron, const Phase phase) {
-    if (phase == ExpectationPhase) {
-        neuron->resetMediumTimeSumActivity();
-    } else if (phase == OutcomePhase) {
-        neuron->resetShortTimeSumActivity();
-    }
-}
-
 /**
  * XCAL dWt function
  */
@@ -57,23 +48,94 @@ float XCALdWt(const float xy, const float theta_p) {
 }
 
 __device__
+float contrastEnhancement(const float x) {
+    float gain = 2.5;   // (gamma)
+    float offset = 1.0; // (theta)
+
+    return 1 / (1 + powf((offset * (1 - x)/x), gain));
+}
+
+/**
+ * Update the incoming synapse weights based on the short-term, medium-term and long-term average activity of the
+ * source and target neuron (the given neuron).
+ */
+__device__
 void updateIncomingSynapsesWeights(Neuron* neuron, const CycleParity parity) {
 
+    float y_l_lrn_min = 0.005;
+    float y_l_lrn_max = 0.05;
+    float y_l_max = 1.5;
+    float y_l_min = 0.2;
+    float y_l = neuron->getLongTimeAverageActivity();
+    float y_m = neuron->getMediumTimeAverageActivity(75); // ToDo: refactor out the magic number
+    float y_s = neuron->getShortTimeAverageActivity(25);  // ToDo: refactor out the magic number
+
+    // Effective learning reate for y_l
+    float y_l_lrn = y_l_lrn_min + (y_l - y_l_min) * ((y_l_lrn_max - y_l_lrn_min)/y_l_max - y_l_min);
+    float y_m_lrn = 1.0;
+
+    float learningRate = 0.1;
+
+    Array<Synapse>* synapses_exc = neuron->getIncomingExcitatorySynapses();
+    Array<Synapse>* synapses_inh = neuron->getIncomingInhibitorySynapses();
+
+    for(Array<Synapse>::iterator i = synapses_exc->begin(); i != synapses_exc->end(); ++i) {
+        Synapse* synapse = *i;
+
+        float x_s = synapse->getSource()->getShortTimeAverageActivity(25);  // ToDo: refactor out the magic number
+        float x_m = synapse->getSource()->getMediumTimeAverageActivity(75); // ToDo: refactor out the magic number
+
+        float xy_s = x_s * y_s;
+        float xy_m = x_m * y_m;
+
+        float dwt = learningRate * (y_m_lrn * XCALdWt(xy_s, xy_m) + y_l_lrn * XCALdWt(xy_s, y_l));
+
+        // Weight bounding
+        float weight = synapse->getWeight();
+        if (dwt > 0) {
+            weight += (1 - weight) * dwt;
+        } else {
+            weight += weight * dwt;
+        }
+        // Contrast enhancement
+        weight = contrastEnhancement(weight);
+
+        // Update the weight in the synapse
+        synapse->updateWeight(weight);
+    }
 
 
-    // ToDo: update the neuron's short_time_avg_activity
-    // x_s * y_s averaged during the last 25ms (during the last quarter of a trial)
-    // ToDo: update the neuron's medium_time_avg_activity
-    // x_m * y_m averaged during the first 75ms of each trial
-    // ToDo: update the neuron's long_time_avg_activity
-    // y_l
+    // Not sure how we should handle inhibitory synaptic plasticity...
+    // references:
+    //  - https://www.cell.com/neuron/fulltext/S0896-6273(12)00771-4
+    //  - https://www.frontiersin.org/articles/10.3389/fncir.2013.00119/full
+    //  - https://www.frontiersin.org/articles/10.3389/fncel.2014.00093/full
+    //
+    // Should we go for an overall inhibitory function such as a simplified FFFB (feedforward & feedback) function?
+    // Or some K-winner-takes-all approach?
+    //    for(Array<Synapse>::iterator i = synapses_inh->begin(); i != synapses_inh->end(); ++i) {
+    //        Synapse* synapse = *i;
+    //
+    //    }
+
+
+
 }
 
 __device__
-void updateNeuronActivity(Neuron* neuron, const Phase phase, const bool beginOfPhase, const CycleParity parity) {
+void updateNeuronActivity(Neuron* neuron,
+                          const Phase phase,
+                          const bool beginOfPhase,
+                          const bool endOfPhase,
+                          const CycleParity parity,
+                          const int outcomePhDuration) {
 
     if (beginOfPhase) {
-        initPhase(neuron, phase);
+        if (phase == ExpectationPhase) {
+            neuron->resetMediumTimeSumActivity();
+        } else if (phase == OutcomePhase) {
+            neuron->resetShortTimeSumActivity();
+        }
     }
 
     // Normalized neuron parameters
@@ -109,14 +171,21 @@ void updateNeuronActivity(Neuron* neuron, const Phase phase, const bool beginOfP
         neuron->incrementMediumTimeSumActivity(y);
     } else if (phase == OutcomePhase) {
         neuron->incrementShortTimeSumActivity(y);
+        if (endOfPhase) {
+            // Update the long time average activity based on the most recent short time average activity.
+            float alpha = 0.02;
+            neuron->incrementLongTimeAverageActivity(neuron->getShortTimeAverageActivity(outcomePhDuration), alpha);
+        }
     }
-    float alpha = 0.05;
-    neuron->incrementLongTimeAverageActivity(y, alpha);
-
 }
 
 __global__
-void cycleParallelized(Array<Neuron>* neurons, const Phase phase, const bool beginOfPhase, const CycleParity parity) {
+void cycleParallelized(Array<Neuron>* neurons,
+                       const Phase phase,
+                       const bool beginOfPhase,
+                       const bool endOfPhase,
+                       const CycleParity parity,
+                       const int outcomePhDuration) {
     // Using the popular grid-stride loop
     // see: https://devblogs.nvidia.com/even-easier-introduction-cuda/
     // see: https://devblogs.nvidia.com/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/
@@ -125,7 +194,7 @@ void cycleParallelized(Array<Neuron>* neurons, const Phase phase, const bool beg
     unsigned int nbOfNeurons = neurons->getSize();
     for (int i = index; i < nbOfNeurons; i += stride) {
         Neuron* neuron = (*neurons)[i];
-        updateNeuronActivity(neuron, phase, beginOfPhase, parity);
+        updateNeuronActivity(neuron, phase, beginOfPhase, endOfPhase, parity, outcomePhDuration);
     }
 }
 
@@ -158,13 +227,15 @@ NeuralNet::~NeuralNet() {
 
 __host__
 void NeuralNet::trial() {
-    for (int i = 0; i < 75; i++) {
+    for (int i = 0; i < expectationPhaseDuration; i++) {
         bool beginOfPhase = i == 0;
-        cycle(ExpectationPhase, beginOfPhase, getParity(i));
+        bool endOfPhase = i == expectationPhaseDuration - 1;
+        cycle(ExpectationPhase, beginOfPhase, endOfPhase, getParity(i));
     }
-    for (int i = 75; i < 100; i++) {
-        bool beginOfPhase = i == 75;
-        cycle(OutcomePhase, beginOfPhase, getParity(i));
+    for (int i = expectationPhaseDuration; i < (expectationPhaseDuration + outcomePhaseDuration); i++) {
+        bool beginOfPhase = i == expectationPhaseDuration;
+        bool endOfPhase = i == expectationPhaseDuration + outcomePhaseDuration - 1;
+        cycle(OutcomePhase, beginOfPhase, endOfPhase, getParity(i));
     }
     // The cycle containing the last updated activities is one cycle after the last one, which was an OddCycle.
     updateWeights(EvenCycle); // Could this be done in parallel with reading the neural net output signals and writing the new input signals?
@@ -182,13 +253,13 @@ void NeuralNet::updateActivity(float activity[], unsigned int fromNeuronId, unsi
 }
 
 __host__
-void NeuralNet::cycle(const Phase phase, const bool beginOfPhase, const CycleParity parity) {
+void NeuralNet::cycle(const Phase phase, const bool beginOfPhase, const bool endOfPhase, const CycleParity parity) {
     // Divide the neurons over a whole bunch of threads and get them to work...
     // ToDo: see which number of blocks and block size work best...
     // Test with block size of 1024 (i.e. number of threads per block).
     // Mind that cycleParallelized(...) must be called as a function, not a method! CUDA constraint...
 
-    cycleParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, phase, beginOfPhase, parity);
+    cycleParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, phase, beginOfPhase, endOfPhase, parity, outcomePhaseDuration);
     cudaDeviceSynchronize();
 
     cudaError_t cudaError;

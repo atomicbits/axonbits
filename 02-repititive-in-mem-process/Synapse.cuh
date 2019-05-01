@@ -22,6 +22,10 @@ public:
     __host__ __device__
     float getWeight() const;
 
+    // Update the weight
+    __host__ __device__
+    void updateWeight(const float weight_update);
+
     // Get the source
     __host__ __device__
     Neuron* getSource() const;

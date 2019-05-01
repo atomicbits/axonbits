@@ -307,7 +307,7 @@ test: build
 	$(EXEC) ./unittests
 
 clean:
-	rm -f util/Array.o controller unittests controller.o Managed.o NeuralNet.o Layer.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o
+	rm -f util/Array.o controller unittests controller.o Managed.o CycleParity.o Phase.o NeuralNet.o Layer.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/controller
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/unittests
 
