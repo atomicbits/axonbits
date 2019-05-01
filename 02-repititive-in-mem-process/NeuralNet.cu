@@ -113,6 +113,8 @@ void updateIncomingSynapsesWeights(Neuron* neuron, const CycleParity parity) {
     //
     // Should we go for an overall inhibitory function such as a simplified FFFB (feedforward & feedback) function?
     // Or some K-winner-takes-all approach?
+    // Or should we add some inhibitory neurons with fixed weights to play the same role? This has the advantage that
+    // it is completely distributed and is easily to integrate in our GPU-based solution!
     //    for(Array<Synapse>::iterator i = synapses_inh->begin(); i != synapses_inh->end(); ++i) {
     //        Synapse* synapse = *i;
     //
@@ -158,7 +160,8 @@ void updateNeuronActivity(Neuron* neuron,
 
     float g_e_theta = (g_i * (E_i - theta) + g_l * (E_l - theta)) / (theta - E_e);
 
-    float g_e_rel = avgInputActivity(neuron->getIncomingExcitatorySynapses(), parity); // g_e_rel = g_e(t) = 1/n * sum_i(x_i(t) * w_i)
+    // g_e_rel = g_e(t) = 1/n * sum_i(x_i(t) * w_i)
+    float g_e_rel = avgInputActivity(neuron->getIncomingExcitatorySynapses(), parity);
     float g_e = g_bar_e * g_e_rel;
 
     float y_current = neuron->getActivity(parity);
@@ -244,11 +247,23 @@ void NeuralNet::trial() {
 __host__
 void NeuralNet::getActivity(float activity[], unsigned int fromNeuronId, unsigned int toNeuronId) const {
     // Assume the last activity has an odd cycle parity.
+    int activityIndex = 0;
+    for (Array<Neuron>::iterator i = neurons->index(fromNeuronId); i != neurons->index(toNeuronId + 1); ++i) {
+        Neuron* neuron = *i;
+        activity[activityIndex] = neuron->getActivity(OddCycle);
+        ++activityIndex;
+    }
     return;
 }
 
 __host__
 void NeuralNet::updateActivity(float activity[], unsigned int fromNeuronId, unsigned int toNeuronId) {
+    int activityIndex = 0;
+    for (Array<Neuron>::iterator i = neurons->index(fromNeuronId); i != neurons->index(toNeuronId + 1); ++i) {
+        Neuron* neuron = *i;
+        neuron->setExternalActivity(activity[activityIndex]);
+        ++activityIndex;
+    }
     return;
 }
 

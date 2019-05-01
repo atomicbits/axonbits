@@ -143,6 +143,9 @@ public:
     __host__ __device__
     iterator end() const{ return iterator(data + size); }
 
+    __host__ __device__
+    iterator index(const unsigned int index) const{ return iterator(data + index); }
+
 
 private:
     T** data; // if you're breaking your head on this, read https://stackoverflow.com/questions/6130712/pointer-to-array-of-pointers
