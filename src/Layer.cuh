@@ -2,8 +2,8 @@
 // Created by Peter Rigole on 2019-04-24.
 //
 
-#ifndef INC_02_REPITITIVE_IN_MEM_PROCESS_LAYER_H
-#define INC_02_REPITITIVE_IN_MEM_PROCESS_LAYER_H
+#ifndef AXONBITS_LAYER_H
+#define AXONBITS_LAYER_H
 
 #include "Managed.cuh"
 #include "Neuron.cuh"
@@ -38,4 +38,4 @@ private:
 };
 
 
-#endif //INC_02_REPITITIVE_IN_MEM_PROCESS_LAYER_H
+#endif //AXONBITS_LAYER_H

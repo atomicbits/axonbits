@@ -3,8 +3,8 @@
 //
 #include <stddef.h>
 
-#ifndef INC_01_GETTING_STARTED_MANAGED_H
-#define INC_01_GETTING_STARTED_MANAGED_H
+#ifndef AXONBITS_MANAGED_H
+#define AXONBITS_MANAGED_H
 
 
 // Managed Base Class -- inherit from this to automatically
@@ -20,4 +20,4 @@ public:
 };
 
 
-#endif //INC_01_GETTING_STARTED_MANAGED_H
+#endif //AXONBITS_MANAGED_H

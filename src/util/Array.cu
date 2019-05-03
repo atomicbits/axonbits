@@ -2,8 +2,8 @@
 // Created by Peter Rigole on 2019-04-19.
 //
 
-#ifndef INC_02_REPITITIVE_IN_MEM_PROCESS_ARRAY_H
-#define INC_02_REPITITIVE_IN_MEM_PROCESS_ARRAY_H
+#ifndef AXONBITS_ARRAY_H
+#define AXONBITS_ARRAY_H
 
 #include "../Managed.cuh"
 #include <assert.h>
@@ -154,4 +154,4 @@ private:
 };
 
 
-#endif //INC_02_REPITITIVE_IN_MEM_PROCESS_ARRAY_H
+#endif //AXONBITS_ARRAY_H

@@ -2,8 +2,8 @@
 // Created by Peter Rigole on 2019-04-26.
 //
 
-#ifndef INC_02_REPITITIVE_IN_MEM_PROCESS_CYCLEPARITY_H
-#define INC_02_REPITITIVE_IN_MEM_PROCESS_CYCLEPARITY_H
+#ifndef AXONBITS_CYCLEPARITY_H
+#define AXONBITS_CYCLEPARITY_H
 
 /**
  * All threads working on a cycle have the same cycle parity. This parity is used to identify the activity variable
@@ -12,4 +12,4 @@
  */
 enum CycleParity { EvenCycle, OddCycle };
 
-#endif //INC_02_REPITITIVE_IN_MEM_PROCESS_CYCLEPARITY_H
+#endif //AXONBITS_CYCLEPARITY_H

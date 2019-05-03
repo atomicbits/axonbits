@@ -2,8 +2,8 @@
 // Created by Peter Rigole on 2019-03-13.
 //
 
-#ifndef INC_02_REPITITIVE_IN_MEM_PROCESS_SYNAPSE_H
-#define INC_02_REPITITIVE_IN_MEM_PROCESS_SYNAPSE_H
+#ifndef AXONBITS_SYNAPSE_H
+#define AXONBITS_SYNAPSE_H
 
 #include "Managed.cuh"
 #include "Neuron.cuh"
@@ -38,4 +38,4 @@ private:
 };
 
 
-#endif //INC_02_REPITITIVE_IN_MEM_PROCESS_SYNAPSE_H
+#endif //AXONBITS_SYNAPSE_H

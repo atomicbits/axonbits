@@ -2,8 +2,8 @@
 // Created by Peter Rigole on 2019-04-24.
 //
 
-#ifndef INC_02_REPITITIVE_IN_MEM_PROCESS_TEST_H
-#define INC_02_REPITITIVE_IN_MEM_PROCESS_TEST_H
+#ifndef AXONBITS_TEST_H
+#define AXONBITS_TEST_H
 
 #include <string>
 
@@ -39,4 +39,4 @@ private:
 };
 
 
-#endif //INC_02_REPITITIVE_IN_MEM_PROCESS_TEST_H
+#endif //AXONBITS_TEST_H

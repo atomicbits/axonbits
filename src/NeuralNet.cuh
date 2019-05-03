@@ -2,8 +2,8 @@
 // Created by Peter Rigole on 2019-03-13.
 //
 
-#ifndef INC_02_REPITITIVE_IN_MEM_PROCESS_NEURALNET_H
-#define INC_02_REPITITIVE_IN_MEM_PROCESS_NEURALNET_H
+#ifndef AXONBITS_NEURALNET_H
+#define AXONBITS_NEURALNET_H
 
 #include "Managed.cuh"
 #include "Neuron.cuh"
@@ -100,4 +100,4 @@ private:
 };
 
 
-#endif //INC_02_REPITITIVE_IN_MEM_PROCESS_NEURALNET_H
+#endif //AXONBITS_NEURALNET_H
