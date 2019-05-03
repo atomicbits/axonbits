@@ -7,6 +7,8 @@
 // Default Constructor
 Synapse::Synapse() : weight(0.5) {}
 
+Synapse::Synapse(float weight_init, Neuron* source_init) : weight(weight_init), source(source_init) {}
+
 // Destructor
 Synapse::~Synapse() {
 
@@ -23,6 +25,10 @@ void Synapse::updateWeight(const float weight_update) {
     weight = weight_update;
 }
 
-// Get the source
 __host__ __device__
 Neuron *Synapse::getSource() const { return source; }
+
+__host__
+void Synapse::setSource(Neuron* neuron) {
+    source = neuron;
+}

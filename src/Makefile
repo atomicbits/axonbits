@@ -260,7 +260,7 @@ test/Test.o:test/Test.cu
 test/util/ArrayTest.o:test/util/ArrayTest.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
-test/neuralnet/NeuraNetTest.o:test/neuralnet/NeuraNetTest.cu
+test/neuralnet/NeuralNetTest.o:test/neuralnet/NeuralNetTest.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
 test/neuralnet/TestInputProcessor.o:test/neuralnet/TestInputProcessor.cu
@@ -310,7 +310,7 @@ controller: util/Array.o Managed.o InputProcessor.o OutputProcessor.o NeuralNet.
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
-unittests: Managed.o test/Test.o test/util/ArrayTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o test/neuralnet/NeuraNetTest.o test/unittests.o
+unittests: Managed.o test/Test.o test/util/ArrayTest.o InputProcessor.o OutputProcessor.o NeuralNet.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o test/unittests.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
@@ -322,7 +322,7 @@ test: build
 	$(EXEC) ./unittests
 
 clean:
-	rm -f util/Array.o controller unittests controller.o Managed.o CycleParity.o Phase.o NeuralNet.o Layer.o InputProcessor.o OutputProcessor.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o
+	rm -f util/Array.o controller unittests controller.o Managed.o CycleParity.o Phase.o NeuralNet.o Layer.o InputProcessor.o OutputProcessor.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/controller
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/unittests
 

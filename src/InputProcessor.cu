@@ -6,6 +6,8 @@
 
 InputProcessor::InputProcessor() {}
 
+InputProcessor::InputProcessor(NeuralNet* neuralNet_init) : neuralNet(neuralNet_init) {}
+
 void InputProcessor::setNeuralNet(NeuralNet* neuralNet_update) {
     neuralNet = neuralNet_update;
 }

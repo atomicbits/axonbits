@@ -217,6 +217,10 @@ void updateWeightsParallelized(Array<Neuron>* neurons, const CycleParity parity)
 // = = = = = = = = = = = = = = = = = =
 
 
+NeuralNet::NeuralNet() : max_nb_of_threads(256), max_nb_of_blocks(4096) {
+    nb_of_threads = max_nb_of_threads;
+    nb_of_blocks = max_nb_of_blocks;
+}
 
 NeuralNet::NeuralNet(unsigned int maxNeurons_init) : max_nb_of_threads(256), max_nb_of_blocks(4096) {
     nb_of_threads = max_nb_of_threads;
@@ -236,6 +240,11 @@ void NeuralNet::addNeuron(Neuron* neuron) {
 __host__
 Neuron* NeuralNet::getNeuron(unsigned long int neuronId) {
     return (*neurons)[neuronId];
+}
+
+__host__
+void NeuralNet::init() {
+    cudaDeviceSynchronize();
 }
 
 __host__

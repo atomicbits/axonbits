@@ -15,6 +15,9 @@ public:
     // Default Constructor
     Synapse();
 
+    __host__
+    Synapse(float weight_init, Neuron* source_init);
+
     // Destructor
     ~Synapse();
 
@@ -29,6 +32,10 @@ public:
     // Get the source
     __host__ __device__
     Neuron* getSource() const;
+
+    // Set the source
+    __host__
+    void setSource(Neuron* neuron);
 
 private:
     // The synapse weight

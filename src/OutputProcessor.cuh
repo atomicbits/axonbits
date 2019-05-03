@@ -19,6 +19,8 @@ public:
 
     OutputProcessor();
 
+    OutputProcessor(NeuralNet* neuralNet_init);
+
     void setNeuralNet(NeuralNet* neuralNet_update);
 
     virtual void processOutput();

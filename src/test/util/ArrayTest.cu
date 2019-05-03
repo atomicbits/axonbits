@@ -77,6 +77,8 @@ public:
         arr->append(new TestContainer(1.0, 2.0, 300.0, 1, 2, 100));
         arr->append(new TestContainer(4.0, 5.0, 6.0, 4, 5, 6));
         arr->append(new TestContainer(7.0, 8.0, 9.0, 7, 8, 9));
+
+        cudaDeviceSynchronize();
     }
 
     __host__

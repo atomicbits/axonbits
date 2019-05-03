@@ -6,14 +6,13 @@
 #define AXONBITS_TESTOUTPUTPROCESSOR_H
 
 #include "../../OutputProcessor.cuh"
+#include "../../NeuralNet.cuh"
 
 class TestOutputProcessor : public OutputProcessor {
 
 public:
 
-    TestOutputProcessor() {
-
-    }
+    TestOutputProcessor(NeuralNet* neuralNet_init) : OutputProcessor(neuralNet_init) {}
 
     void processOutput() {
 

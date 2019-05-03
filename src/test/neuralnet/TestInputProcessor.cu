@@ -6,14 +6,13 @@
 #define AXONBITS_TESTINPUTPROCESSOR_H
 
 #include "../../InputProcessor.cuh"
+#include "../../NeuralNet.cuh"
 
 class TestInputProcessor : public InputProcessor {
 
 public:
 
-    TestInputProcessor() {
-
-    }
+    TestInputProcessor(NeuralNet* neuralNet_init) : InputProcessor(neuralNet_init) {}
 
     void processInput() {
 

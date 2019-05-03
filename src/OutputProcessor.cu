@@ -6,6 +6,8 @@
 
 OutputProcessor::OutputProcessor() {}
 
+OutputProcessor::OutputProcessor(NeuralNet* neuralNet_init) : neuralNet(neuralNet_init) {}
+
 void OutputProcessor::setNeuralNet(NeuralNet* neuralNet_update) {
     neuralNet = neuralNet_update;
 }

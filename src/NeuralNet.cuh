@@ -21,6 +21,8 @@ class NeuralNet : public Managed {
 
 public:
 
+    NeuralNet();
+
     /**
      * Constructor
      *
@@ -51,6 +53,9 @@ public:
 
     __host__
     Neuron* getNeuron(unsigned long int neuronId);
+
+    __host__
+    void init();
 
     __host__
     void trial();
@@ -105,6 +110,7 @@ private:
     __host__
     void process10HzOutput();
 
+    // Input and output processors are not managed now, this should not be necessary.
     InputProcessor* inputProcessor10Hz;
     OutputProcessor* outputProcessor10Hz;
 

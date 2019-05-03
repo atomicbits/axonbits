@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include "util/ArrayTest.cu"
+#include "neuralnet/NeuralNetTest.cu"
 
 __global__
 void run_device_test(Test* test) {
@@ -50,6 +51,10 @@ int main(int argc, char **argv) {
     ArrayTest* arrayTest = new ArrayTest();
     launch_test(arrayTest);
     delete arrayTest;
+
+    NeuralNetTest* neuralNetTest = new NeuralNetTest();
+    launch_test(neuralNetTest);
+    delete neuralNetTest;
 
     printf("Testing done.\n");
 
