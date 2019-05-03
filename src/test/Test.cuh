@@ -13,7 +13,7 @@
  * I'll be glad to learn a better way to solve this!
  */
 
-enum TestClass { arraytest, unknown };
+enum TestClass { arraytest, neuralnettest, unknown };
 
 class Test {
 

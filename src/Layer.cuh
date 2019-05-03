@@ -37,5 +37,4 @@ private:
 
 };
 
-
 #endif //AXONBITS_LAYER_H

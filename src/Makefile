@@ -260,6 +260,15 @@ test/Test.o:test/Test.cu
 test/util/ArrayTest.o:test/util/ArrayTest.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
+test/neuralnet/NeuraNetTest.o:test/neuralnet/NeuraNetTest.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
+test/neuralnet/TestInputProcessor.o:test/neuralnet/TestInputProcessor.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
+test/neuralnet/TestOutputProcessor.o:test/neuralnet/TestOutputProcessor.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
 test/unittests.o:test/unittests.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
@@ -287,15 +296,21 @@ Synapse.o:Synapse.cu
 Layer.o:Layer.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
+InputProcessor.o:InputProcessor.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
+OutputProcessor.o:OutputProcessor.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
 NeuralNet.o:NeuralNet.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
-controller: util/Array.o Managed.o NeuralNet.o Layer.o controller.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o
+controller: util/Array.o Managed.o InputProcessor.o OutputProcessor.o NeuralNet.o Layer.o controller.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
-unittests: Managed.o test/Test.o test/util/ArrayTest.o test/unittests.o
+unittests: Managed.o test/Test.o test/util/ArrayTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o test/neuralnet/NeuraNetTest.o test/unittests.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
@@ -307,7 +322,7 @@ test: build
 	$(EXEC) ./unittests
 
 clean:
-	rm -f util/Array.o controller unittests controller.o Managed.o CycleParity.o Phase.o NeuralNet.o Layer.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o
+	rm -f util/Array.o controller unittests controller.o Managed.o CycleParity.o Phase.o NeuralNet.o Layer.o InputProcessor.o OutputProcessor.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/controller
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/unittests
 

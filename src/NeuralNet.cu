@@ -229,19 +229,55 @@ NeuralNet::~NeuralNet() {
 }
 
 __host__
+void NeuralNet::addNeuron(Neuron* neuron) {
+    neurons->set(neuron, neuron->getId());
+}
+
+__host__
+Neuron* NeuralNet::getNeuron(unsigned long int neuronId) {
+    return (*neurons)[neuronId];
+}
+
+__host__
 void NeuralNet::trial() {
-    for (int i = 0; i < expectationPhaseDuration; i++) {
-        bool beginOfPhase = i == 0;
-        bool endOfPhase = i == expectationPhaseDuration - 1;
-        cycle(ExpectationPhase, beginOfPhase, endOfPhase, getParity(i));
+
+    for (int i = 0; i < (expectationPhaseDuration + outcomePhaseDuration); i++) {
+        bool beginOfPhase = i == 0 || i == expectationPhaseDuration;
+        bool endOfPhase = i == expectationPhaseDuration - 1 || i == expectationPhaseDuration + outcomePhaseDuration - 1;
+        Phase currentPhase;
+        if (i < expectationPhaseDuration) {
+            currentPhase = ExpectationPhase;
+        } else {
+            currentPhase = OutcomePhase;
+        }
+        if (i % 100 == 0) process10HzInput();
+        if ((i + 1) % 100 == 0) process10HzOutput();
+
+        cycle(currentPhase, beginOfPhase, endOfPhase, getParity(i));
     }
-    for (int i = expectationPhaseDuration; i < (expectationPhaseDuration + outcomePhaseDuration); i++) {
-        bool beginOfPhase = i == expectationPhaseDuration;
-        bool endOfPhase = i == expectationPhaseDuration + outcomePhaseDuration - 1;
-        cycle(OutcomePhase, beginOfPhase, endOfPhase, getParity(i));
-    }
+
     // The cycle containing the last updated activities is one cycle after the last one, which was an OddCycle.
     updateWeights(EvenCycle); // Could this be done in parallel with reading the neural net output signals and writing the new input signals?
+}
+
+__host__
+void NeuralNet::process10HzInput() {
+    inputProcessor10Hz->processInput();
+}
+
+__host__
+void NeuralNet::process10HzOutput() {
+    outputProcessor10Hz->processOutput();
+}
+
+__host__
+void NeuralNet::register10HzInputProcessor(InputProcessor* inputProcessor_update) {
+    inputProcessor10Hz = inputProcessor_update;
+}
+
+__host__
+void NeuralNet::register10HzOutputProcessor(OutputProcessor* outputProcessor_update) {
+    outputProcessor10Hz = outputProcessor_update;
 }
 
 __host__

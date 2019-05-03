@@ -6,8 +6,6 @@
 #include "Test.cuh"
 #include "util/ArrayTest.cu"
 
-// class ArrayTest : public Test ; // forward declaration to cope with cyclic dependency
-
 Test::Test() : type(TestClass::unknown) {}
 
 Test::Test(const TestClass type_init): type(type_init) {}

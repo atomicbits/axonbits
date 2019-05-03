@@ -11,6 +11,11 @@
 #include "util/Array.cu"
 #include "Phase.cu"
 #include "CycleParity.cu"
+#include "InputProcessor.cuh"
+#include "OutputProcessor.cuh"
+
+class InputProcessor; // forward declaration to cope with cyclic dependency
+class OutputProcessor; // forward declaration to cope with cyclic dependency
 
 class NeuralNet : public Managed {
 
@@ -45,7 +50,16 @@ public:
     void addNeuron(Neuron* neuron);
 
     __host__
+    Neuron* getNeuron(unsigned long int neuronId);
+
+    __host__
     void trial();
+
+    __host__
+    void register10HzInputProcessor(InputProcessor* inputProcessor_update);
+
+    __host__
+    void register10HzOutputProcessor(OutputProcessor* outputProcessor_update);
 
     /**
      * Get the activity of the neurons from id 'fromNeuronId' to id 'toNeuronId'.
@@ -84,6 +98,15 @@ private:
 
     __host__
     CycleParity getParity(int i);
+
+    __host__
+    void process10HzInput();
+
+    __host__
+    void process10HzOutput();
+
+    InputProcessor* inputProcessor10Hz;
+    OutputProcessor* outputProcessor10Hz;
 
     /**
      * The neuron array.
