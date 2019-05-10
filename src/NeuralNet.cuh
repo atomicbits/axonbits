@@ -49,10 +49,10 @@ public:
      *
      */
     __host__
-    void addNeuron(Neuron* neuron);
+    void addNeuron(Neuron &neuron, unsigned int index);
 
-    __host__
-    Neuron* getNeuron(unsigned long int neuronId);
+    __host__ __device__
+    Neuron* getNeuron(unsigned long int neuronIndex);
 
     __host__
     void init();

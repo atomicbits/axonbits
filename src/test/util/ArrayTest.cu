@@ -17,9 +17,12 @@ void launchArrayTestDeviceTest(ArrayTest *test) {
 __host__
 ArrayTest::ArrayTest() : Test("ArrayTest") {
     arr = new Array<TestContainer>(5);
-    arr->append(TestContainer(1.0, 2.0, 300.0, 1, 2, 100));
-    arr->append(TestContainer(4.0, 5.0, 6.0, 4, 5, 6));
-    arr->append(TestContainer(7.0, 8.0, 9.0, 7, 8, 9));
+    TestContainer tc1 = TestContainer(1.0, 2.0, 300.0, 1, 2, 100);
+    TestContainer tc2 = TestContainer(4.0, 5.0, 6.0, 4, 5, 6);
+    TestContainer tc3 = TestContainer(7.0, 8.0, 9.0, 7, 8, 9);
+    arr->append(tc1);
+    arr->append(tc2);
+    arr->append(tc3);
 
     cudaDeviceSynchronize();
 }
@@ -65,4 +68,3 @@ void ArrayTest::hostTest() {
     assert((*arr)[2].getZ() == 15); // should be 15!
     return;
 }
-

@@ -15,7 +15,7 @@ class NeuralNetTest : public Managed, public Test {
 
 public:
 
-    NeuralNetTest() : Test(TestClass::neuralnettest) {}
+    NeuralNetTest() : Test("NeuralNetTest") {}
 
     ~NeuralNetTest() {}
 
@@ -35,7 +35,7 @@ public:
 //    }
 
     __host__
-    void hostTest() {
+    void test() {
 
         printf("creating the neural net");
 
@@ -46,8 +46,8 @@ public:
 
         NeuronProperties *properties = new NeuronProperties();
 
-        Neuron *neuronZero = new Neuron(0, properties, 100, 0);
-        neuralNet->addNeuron(neuronZero);
+        Neuron neuronZero = Neuron(properties, 100, 0);
+        neuralNet->addNeuron(neuronZero, 0);
         float activities[1] = { 0.9 };
         neuralNet->updateActivity(activities, 0, 0);
 
@@ -60,12 +60,12 @@ public:
 
         for (int i = 1; i < nbOfNeurons; ++i) {
             if (i % 100000 == 0) printf(" adding neuron %i", i);
-            Neuron *neuron = new Neuron(i, properties, nbOfSynapses, 0);
+            Neuron neuron = Neuron(properties, nbOfSynapses, 0);
             for (int j = 0; j < nbOfSynapses; ++j) {
-                Synapse* synapse = new Synapse(0.5, neuronZero);
-                neuron->addIncomingExcitatorySynapse(synapse);
+                Synapse synapse = Synapse(0.5f, 0);
+                neuron.addIncomingExcitatorySynapse(synapse);
             }
-            neuralNet->addNeuron(neuron);
+            neuralNet->addNeuron(neuron, i);
         }
 
         TestInputProcessor* inputProcessor = new TestInputProcessor(neuralNet);
@@ -83,14 +83,6 @@ public:
         delete (inputProcessor);
         delete (outputProcessor);
 
-    }
-
-    __device__
-    void deviceTest() {}
-
-    __host__
-    const char* getName() {
-        return "NeuralNetTest";
     }
 
 };

@@ -20,13 +20,13 @@ float positivePart(float x) {
  * g_e(t) = 1/n * sum_i(x_i(t) * w_i)
  */
 __device__
-float avgInputActivity(Array<Synapse>* synapses, const CycleParity parity) {
+float avgInputActivity(NeuralNet *neuralNet, Array<Synapse>* synapses, const CycleParity parity) {
     int number = 0;
     float sum = 0.0;
     for(Array<Synapse>::iterator i = synapses->begin(); i != synapses->end(); ++i) {
-        Synapse* synapse = *i;
+        Synapse* synapse = &*i;
         float weight = synapse->getWeight();
-        float activity = synapse->getSource()->getActivity(parity);
+        float activity = neuralNet->getNeuron(synapse->getSource())->getActivity(parity);
         sum += activity * weight;
         ++number;
     }
@@ -60,7 +60,7 @@ float contrastEnhancement(const float x) {
  * source and target neuron (the given neuron).
  */
 __device__
-void updateIncomingSynapsesWeights(Neuron* neuron, const CycleParity parity) {
+void updateIncomingSynapsesWeights(NeuralNet* neuralNet, Neuron* neuron, const CycleParity parity) {
 
     float y_l_lrn_min = 0.005;
     float y_l_lrn_max = 0.05;
@@ -80,10 +80,10 @@ void updateIncomingSynapsesWeights(Neuron* neuron, const CycleParity parity) {
     Array<Synapse>* synapses_inh = neuron->getIncomingInhibitorySynapses();
 
     for(Array<Synapse>::iterator i = synapses_exc->begin(); i != synapses_exc->end(); ++i) {
-        Synapse* synapse = *i;
+        Synapse* synapse = &*i;
 
-        float x_s = synapse->getSource()->getShortTimeAverageActivity(25);  // ToDo: refactor out the magic number
-        float x_m = synapse->getSource()->getMediumTimeAverageActivity(75); // ToDo: refactor out the magic number
+        float x_s = neuralNet->getNeuron(synapse->getSource())->getShortTimeAverageActivity(25);  // ToDo: refactor out the magic number
+        float x_m = neuralNet->getNeuron(synapse->getSource())->getMediumTimeAverageActivity(75); // ToDo: refactor out the magic number
 
         float xy_s = x_s * y_s;
         float xy_m = x_m * y_m;
@@ -125,7 +125,8 @@ void updateIncomingSynapsesWeights(Neuron* neuron, const CycleParity parity) {
 }
 
 __device__
-void updateNeuronActivity(Neuron* neuron,
+void updateNeuronActivity(NeuralNet* neuralNet,
+                          Neuron* neuron,
                           const Phase phase,
                           const bool beginOfPhase,
                           const bool endOfPhase,
@@ -155,13 +156,13 @@ void updateNeuronActivity(Neuron* neuron,
 
     // g_i_rel should be calculated as defined in FFFB inhibition function, or a better and more local way?
     // can we use local inhibition neurons to replace FFFB in a simple way?
-    float g_i_rel = avgInputActivity(neuron->getIncomingInhibitorySynapses(), parity);
+    float g_i_rel = avgInputActivity(neuralNet, neuron->getIncomingInhibitorySynapses(), parity);
     float g_i = g_bar_i * g_i_rel;
 
     float g_e_theta = (g_i * (E_i - theta) + g_l * (E_l - theta)) / (theta - E_e);
 
     // g_e_rel = g_e(t) = 1/n * sum_i(x_i(t) * w_i)
-    float g_e_rel = avgInputActivity(neuron->getIncomingExcitatorySynapses(), parity);
+    float g_e_rel = avgInputActivity(neuralNet, neuron->getIncomingExcitatorySynapses(), parity);
     float g_e = g_bar_e * g_e_rel;
 
     float y_current = neuron->getActivity(parity);
@@ -183,7 +184,8 @@ void updateNeuronActivity(Neuron* neuron,
 }
 
 __global__
-void cycleParallelized(Array<Neuron>* neurons,
+void cycleParallelized(NeuralNet* neuralNet,
+                       Array<Neuron>* neurons,
                        const Phase phase,
                        const bool beginOfPhase,
                        const bool endOfPhase,
@@ -196,19 +198,19 @@ void cycleParallelized(Array<Neuron>* neurons,
     int stride = blockDim.x * gridDim.x;
     unsigned int nbOfNeurons = neurons->getSize();
     for (int i = index; i < nbOfNeurons; i += stride) {
-        Neuron* neuron = (*neurons)[i];
-        updateNeuronActivity(neuron, phase, beginOfPhase, endOfPhase, parity, outcomePhDuration);
+        Neuron* neuron = &((*neurons)[i]);
+        updateNeuronActivity(neuralNet, neuron, phase, beginOfPhase, endOfPhase, parity, outcomePhDuration);
     }
 }
 
 __global__
-void updateWeightsParallelized(Array<Neuron>* neurons, const CycleParity parity) {
+void updateWeightsParallelized(NeuralNet* neuralNet, Array<Neuron>* neurons, const CycleParity parity) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
     unsigned int nbOfNeurons = neurons->getSize();
     for (int i = index; i < nbOfNeurons; i += stride) {
-        Neuron* neuron = (*neurons)[i];
-        updateIncomingSynapsesWeights(neuron, parity);
+        Neuron* neuron = &((*neurons)[i]);
+        updateIncomingSynapsesWeights(neuralNet, neuron, parity);
     }
 }
 
@@ -233,13 +235,13 @@ NeuralNet::~NeuralNet() {
 }
 
 __host__
-void NeuralNet::addNeuron(Neuron* neuron) {
-    neurons->set(neuron, neuron->getId());
+void NeuralNet::addNeuron(Neuron &neuron, unsigned int index) {
+    neurons->set(neuron, index);
 }
 
-__host__
-Neuron* NeuralNet::getNeuron(unsigned long int neuronId) {
-    return (*neurons)[neuronId];
+__host__ __device__
+Neuron* NeuralNet::getNeuron(unsigned long int neuronIndex) {
+    return &((*neurons)[neuronIndex]);
 }
 
 __host__
@@ -294,7 +296,7 @@ void NeuralNet::getActivity(float activity[], unsigned int fromNeuronId, unsigne
     // Assume the last activity has an odd cycle parity.
     int activityIndex = 0;
     for (Array<Neuron>::iterator i = neurons->index(fromNeuronId); i != neurons->index(toNeuronId + 1); ++i) {
-        Neuron* neuron = *i;
+        Neuron* neuron = &*i;
         activity[activityIndex] = neuron->getActivity(OddCycle);
         ++activityIndex;
     }
@@ -305,7 +307,7 @@ __host__
 void NeuralNet::updateActivity(float activity[], unsigned int fromNeuronId, unsigned int toNeuronId) {
     int activityIndex = 0;
     for (Array<Neuron>::iterator i = neurons->index(fromNeuronId); i != neurons->index(toNeuronId + 1); ++i) {
-        Neuron* neuron = *i;
+        Neuron* neuron = &*i;
         neuron->setExternalActivity(activity[activityIndex]);
         ++activityIndex;
     }
@@ -319,7 +321,7 @@ void NeuralNet::cycle(const Phase phase, const bool beginOfPhase, const bool end
     // Test with block size of 1024 (i.e. number of threads per block).
     // Mind that cycleParallelized(...) must be called as a function, not a method! CUDA constraint...
 
-    cycleParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, phase, beginOfPhase, endOfPhase, parity, outcomePhaseDuration);
+    cycleParallelized<<<nb_of_blocks,nb_of_threads>>>(this, neurons, phase, beginOfPhase, endOfPhase, parity, outcomePhaseDuration);
     cudaDeviceSynchronize();
 
     cudaError_t cudaError;
@@ -333,7 +335,7 @@ __host__
 void NeuralNet::updateWeights(const CycleParity parity) {
     // Divide the neurons over a whole bunch of threads and get them to work...
 
-    updateWeightsParallelized<<<nb_of_blocks,nb_of_threads>>>(neurons, parity);
+    updateWeightsParallelized<<<nb_of_blocks,nb_of_threads>>>(this, neurons, parity);
     cudaDeviceSynchronize();
 
     cudaError_t cudaError;

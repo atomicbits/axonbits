@@ -4,11 +4,9 @@
 
 #include "Neuron.cuh"
 
-Neuron::Neuron(unsigned long int neuronId,
-               NeuronProperties *neuronProperties,
+Neuron::Neuron(NeuronProperties *neuronProperties,
                unsigned int max_nb_incoming_excitatory_synapses,
                unsigned int max_nb_incoming_inhibitory_synapses) :
-               id(neuronId),
                properties(neuronProperties),
                short_time_sum_activity(0.0),
                medium_time_sum_activity(0.0),
@@ -17,6 +15,19 @@ Neuron::Neuron(unsigned long int neuronId,
     incoming_inhibitory_synapses = new Array<Synapse>(max_nb_incoming_inhibitory_synapses);
 }
 
+__host__ __device__
+Neuron::Neuron(const Neuron &neuronOrig) {
+    properties = neuronOrig.properties;
+    activity_even_parity = neuronOrig.activity_even_parity;
+    activity_odd_parity = neuronOrig.activity_odd_parity;
+    short_time_sum_activity = neuronOrig.short_time_sum_activity;
+    medium_time_sum_activity = neuronOrig.medium_time_sum_activity;
+    long_time_avg_activity = neuronOrig.long_time_avg_activity;
+    incoming_excitatory_synapses = neuronOrig.incoming_excitatory_synapses;
+    incoming_inhibitory_synapses = neuronOrig.incoming_inhibitory_synapses;
+}
+
+__host__
 Neuron::~Neuron() {
     delete incoming_excitatory_synapses;
     delete incoming_inhibitory_synapses;
@@ -24,10 +35,6 @@ Neuron::~Neuron() {
     // * properties (because neuron properties are shared)
 
 }
-
-// Get the id
-__host__ __device__
-unsigned long int Neuron::getId() const { return id; }
 
 __host__ __device__
 const NeuronProperties *Neuron::getProperties() const { return properties; }
@@ -105,8 +112,8 @@ Array<Synapse>* Neuron::getIncomingExcitatorySynapses() const {
     return incoming_excitatory_synapses;
 }
 
-__host__ __device__
-void Neuron::addIncomingExcitatorySynapse(Synapse* synapse) {
+__host__
+void Neuron::addIncomingExcitatorySynapse(Synapse &synapse) {
     incoming_excitatory_synapses->append(synapse);
 }
 
@@ -115,7 +122,7 @@ Array<Synapse>* Neuron::getIncomingInhibitorySynapses() const {
     return incoming_inhibitory_synapses;
 }
 
-__host__ __device__
-void Neuron::addIncomingInhibitorySynapse(Synapse* synapse) {
+__host__
+void Neuron::addIncomingInhibitorySynapse(Synapse &synapse) {
     incoming_inhibitory_synapses->append(synapse);
 }

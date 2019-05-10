@@ -27,17 +27,17 @@ public:
      * @param neuronProperties
      * @param max_nb_incoming_synapses
      */
-    Neuron(unsigned long int neuronId,
-            NeuronProperties* neuronProperties,
+    Neuron(NeuronProperties* neuronProperties,
             unsigned int max_nb_incoming_excitatory_synapses,
             unsigned int max_nb_incoming_inhibitory_synapses);
 
-    // Destructor
-    ~Neuron();
-
-    // Get the id
+    // Copy constructor
     __host__ __device__
-    unsigned long int getId() const;
+    Neuron(const Neuron &neuronOrig);
+
+    // Destructor
+    __host__
+    ~Neuron();
 
     __host__ __device__
     const NeuronProperties* getProperties() const;
@@ -102,17 +102,16 @@ public:
     __host__ __device__
     Array<Synapse>* getIncomingExcitatorySynapses() const;
 
-    __host__ __device__
-    void addIncomingExcitatorySynapse(Synapse* synapse);
+    __host__
+    void addIncomingExcitatorySynapse(Synapse &synapse);
 
     __host__ __device__
     Array<Synapse>* getIncomingInhibitorySynapses() const;
 
-    __host__ __device__
-    void addIncomingInhibitorySynapse(Synapse* synapse);
+    __host__
+    void addIncomingInhibitorySynapse(Synapse &synapse);
 
 private:
-    unsigned long int id;
     const NeuronProperties* properties;
     /**
      * y(t-1) is the current activity, which was calculated in the previous cycle.

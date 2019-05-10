@@ -43,8 +43,8 @@ public:
      * array content is managed by the onwer of the array (the size is assumed to be equal to largest index seen while
      * setting the elements).
      */
-    __host__ __device__
-    void append(T element) {
+    __host__
+    void append(T &element) {
         if (size == max_size) assert(0); // ToDo: exception handling on device, how? https://stackoverflow.com/questions/50755717/triggering-a-runtime-error-within-a-cuda-kernel ?
         data[size] = element;
         ++size;

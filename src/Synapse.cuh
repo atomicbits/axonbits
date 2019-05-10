@@ -16,9 +16,14 @@ public:
     Synapse();
 
     __host__
-    Synapse(float weight_init, Neuron* source_init);
+    Synapse(float weight_init, unsigned int sourceNeuronIndexInit);
+
+    // Copy constructor
+    __host__ __device__
+    Synapse(const Synapse &synapseOrig);
 
     // Destructor
+    __host__
     ~Synapse();
 
     // Get the weight
@@ -31,17 +36,17 @@ public:
 
     // Get the source
     __host__ __device__
-    Neuron* getSource() const;
+    unsigned int getSource() const;
 
     // Set the source
     __host__
-    void setSource(Neuron* neuron);
+    void setSource(unsigned int sourceNeuronIndexUpdate);
 
 private:
     // The synapse weight
     float weight;
     // The source neuron
-    Neuron* source; // get the source activity via this source neuron
+    unsigned int sourceNeuronIndex; // get the source activity via this source neuron
 };
 
 

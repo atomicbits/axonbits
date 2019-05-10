@@ -7,9 +7,17 @@
 // Default Constructor
 Synapse::Synapse() : weight(0.5) {}
 
-Synapse::Synapse(float weight_init, Neuron* source_init) : weight(weight_init), source(source_init) {}
+Synapse::Synapse(float weight_init, unsigned int sourceNeuronIndexInit) :
+                    weight(weight_init), sourceNeuronIndex(sourceNeuronIndexInit) {}
+
+__host__ __device__
+Synapse::Synapse(const Synapse &synapseOrig) {
+    weight = synapseOrig.weight;
+    sourceNeuronIndex = synapseOrig.sourceNeuronIndex;
+}
 
 // Destructor
+__host__
 Synapse::~Synapse() {
 
     // Pointers that we don't want to delete here are:
@@ -26,9 +34,9 @@ void Synapse::updateWeight(const float weight_update) {
 }
 
 __host__ __device__
-Neuron *Synapse::getSource() const { return source; }
+unsigned int Synapse::getSource() const { return sourceNeuronIndex; }
 
 __host__
-void Synapse::setSource(Neuron* neuron) {
-    source = neuron;
+void Synapse::setSource(unsigned int sourceNeuronIndexUpdate) {
+    sourceNeuronIndex = sourceNeuronIndexUpdate;
 }

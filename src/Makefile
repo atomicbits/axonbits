@@ -310,8 +310,7 @@ controller: util/Array.o Managed.o InputProcessor.o OutputProcessor.o NeuralNet.
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
-# unittests: Managed.o test/Test.o test/util/ArrayTest.o InputProcessor.o OutputProcessor.o NeuralNet.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o test/unittests.o
-unittests: Managed.o test/Test.o test/util/ArrayTest.o test/unittests.o
+unittests: Managed.o test/Test.o test/util/ArrayTest.o InputProcessor.o OutputProcessor.o NeuralNet.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o test/unittests.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
