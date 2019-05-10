@@ -40,7 +40,7 @@ public:
         printf("creating the neural net");
 
         unsigned int nbOfNeurons = 10000000;
-        int nbOfSynapses = 1;
+        int nbOfSynapses = 100;
 
         NeuralNet* neuralNet = new NeuralNet(nbOfNeurons);
 
@@ -51,13 +51,20 @@ public:
         float activities[1] = { 0.9 };
         neuralNet->updateActivity(activities, 0, 0);
 
+        /**
+         * The results of this test in 32GB RAM:
+         *
+         * 1/ without synapses => process crashes between 4.100.000 and 4.200.000 neurons
+         * 2/ with 100 synapses per neuron => process crashes between 100.000 and 200.000 neurons !!!
+         */
+
         for (int i = 1; i < nbOfNeurons; ++i) {
             if (i % 100000 == 0) printf(" adding neuron %i", i);
             Neuron *neuron = new Neuron(i, properties, nbOfSynapses, 0);
-//            for (int j = 0; j < nbOfSynapses; ++j) {
-//                Synapse* synapse = new Synapse(0.5, neuronZero);
-//                neuron->addIncomingExcitatorySynapse(synapse);
-//            }
+            for (int j = 0; j < nbOfSynapses; ++j) {
+                Synapse* synapse = new Synapse(0.5, neuronZero);
+                neuron->addIncomingExcitatorySynapse(synapse);
+            }
             neuralNet->addNeuron(neuron);
         }
 
