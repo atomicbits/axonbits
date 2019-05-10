@@ -1,48 +1,50 @@
-
 //
 // Created by Peter Rigole on 2019-04-24.
 //
 
-#include "Test.cuh"
-#include "util/ArrayTest.cu"
-#include "neuralnet/NeuralNetTest.cu"
+#ifndef AXONBITS_TEST_H
+#define AXONBITS_TEST_H
 
-Test::Test() : type(TestClass::unknown) {}
+#include <cuda_runtime.h>
+#include <string>
 
-Test::Test(const TestClass type_init): type(type_init) {}
 
-Test::~Test() {}
+/**
+ * Test base class.
+ * Mind that classes with virtual functions can't have a header file.
+ */
+class Test {
 
-__host__
-void Test::hostTest() {
-    if(type == TestClass::arraytest) {
-        static_cast<ArrayTest*>(this)->hostTest();
-    } else if(type == TestClass::neuralnettest) {
-        static_cast<NeuralNetTest*>(this)->hostTest();
-    } else {
-        assert(0);
+public:
+
+    Test() {}
+
+    Test(const char* nameInit) : name(nameInit) {}
+
+    ~Test() {}
+
+    __host__
+    virtual void test() {}
+
+    __host__
+    void checkCudaErrors() {
+        cudaDeviceSynchronize();
+        cudaError_t cudaError;
+        cudaError = cudaGetLastError();
+        if(cudaError != cudaSuccess) {
+            printf("%s device failure, cudaGetLastError() returned %d: %s\n", getName(), cudaError, cudaGetErrorString(cudaError));
+        } else {
+            printf("%s device test successful\n", getName());
+        }
     }
-}
 
-__host__
-const char* Test::getName() {
-    if(type == TestClass::arraytest) {
-        return static_cast<ArrayTest*>(this)->getName();
-    } else if(type == TestClass::neuralnettest) {
-        return static_cast<NeuralNetTest*>(this)->getName();
-    } else {
-        assert(0);
-        return "";
-    }
-}
+    __host__
+    const char* getName() { return name; }
 
-__device__
-void Test::deviceTest() {
-    if(type == TestClass::arraytest) {
-        static_cast<ArrayTest*>(this)->deviceTest();
-    } else if(type == TestClass::neuralnettest) {
-        static_cast<NeuralNetTest*>(this)->deviceTest();
-    } else {
-        assert(0);
-    }
-}
+private:
+    const char* name;
+
+};
+
+
+#endif //AXONBITS_TEST_H

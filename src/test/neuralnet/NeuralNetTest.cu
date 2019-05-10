@@ -6,7 +6,7 @@
 #define AXONBITS_NEURANETTEST_H
 
 #include <assert.h>
-#include "../Test.cuh"
+#include "../Test.cu"
 #include "../../NeuralNet.cuh"
 #include "TestInputProcessor.cu"
 #include "TestOutputProcessor.cu"
