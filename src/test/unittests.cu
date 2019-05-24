@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include "util/ArrayTest.cuh"
-//#include "neuralnet/NeuralNetTest.cu"
+#include "neuralnet/NeuralNetTest.cu"
 
 
 int main(int argc, char **argv) {
@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
     arrayTest->test();
     delete arrayTest;
 
-//    NeuralNetTest* neuralNetTest = new NeuralNetTest();
-//    launch_test(neuralNetTest);
-//    delete neuralNetTest;
+    NeuralNetTest* neuralNetTest = new NeuralNetTest();
+    neuralNetTest->test();
+    // delete neuralNetTest;
 
     printf("Testing done.\n");
 

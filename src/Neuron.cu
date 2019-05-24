@@ -29,11 +29,17 @@ Neuron::Neuron(const Neuron &neuronOrig) {
 
 __host__
 Neuron::~Neuron() {
-    delete incoming_excitatory_synapses;
-    delete incoming_inhibitory_synapses;
     // Pointers that we don't want to delete here are:
     // * properties (because neuron properties are shared)
+    // * incoming_excitatory_synapses;
+    // * incoming_inhibitory_synapses;
 
+}
+
+__host__
+void Neuron::destroySynapes() {
+    delete incoming_excitatory_synapses;
+    delete incoming_inhibitory_synapses;
 }
 
 __host__ __device__

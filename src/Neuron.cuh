@@ -39,6 +39,10 @@ public:
     __host__
     ~Neuron();
 
+    // Because we don't want to delete the synapses in the destructor!
+    __host__
+    void destroySynapes();
+
     __host__ __device__
     const NeuronProperties* getProperties() const;
 

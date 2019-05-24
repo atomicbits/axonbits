@@ -39,10 +39,11 @@ public:
 
         printf("creating the neural net");
 
-        unsigned int nbOfNeurons = 10000000;
-        int nbOfSynapses = 100;
+        unsigned int nbOfNeurons = 2400000;
+        int nbOfSynapses = 1000;
 
         NeuralNet* neuralNet = new NeuralNet(nbOfNeurons);
+        cudaDeviceSynchronize();
 
         NeuronProperties *properties = new NeuronProperties();
 
@@ -51,21 +52,35 @@ public:
         float activities[1] = { 0.9 };
         neuralNet->updateActivity(activities, 0, 0);
 
+        printf("Empty neural net created");
+
         /**
-         * The results of this test in 32GB RAM:
+         * The results of this test in 32GB RAM
+         *
+         * On the version using pointers in all arrays:
          *
          * 1/ without synapses => process crashes between 4.100.000 and 4.200.000 neurons
-         * 2/ with 100 synapses per neuron => process crashes between 100.000 and 200.000 neurons !!!
+         * 2/ with only 100 synapses per neuron => process crashes between 100.000 and 200.000 neurons !!!
+         *
+         *
+         * The version using no pointers in the arrays, but instead the raw objects, and the synapses use an
+         * unsigned int (4 bytes) instead of a pointer reference (8 bytes) to the source neuron (the unsigned int
+         * represents an offset in the global neurons array).
+         *
+         * 1/ with 1000 (!) synapses per neuron => process crashes between 2.400.000 and 2.500.000 neurons.
+         * => the improvement is gigantic, just by dumping the pointers
+         *
          */
 
         for (int i = 1; i < nbOfNeurons; ++i) {
             if (i % 100000 == 0) printf(" adding neuron %i", i);
-            Neuron neuron = Neuron(properties, nbOfSynapses, 0);
+            Neuron *neuron = new Neuron(properties, nbOfSynapses, 0); // The 'new' triggers the 'new Array' for the synapses inside the neuron object...
             for (int j = 0; j < nbOfSynapses; ++j) {
                 Synapse synapse = Synapse(0.5f, 0);
-                neuron.addIncomingExcitatorySynapse(synapse);
+                neuron->addIncomingExcitatorySynapse(synapse);
             }
-            neuralNet->addNeuron(neuron, i);
+            neuralNet->addNeuron(*neuron, i);
+            delete (neuron); // Doesn't delete the synapse arrays!
         }
 
         TestInputProcessor* inputProcessor = new TestInputProcessor(neuralNet);
@@ -80,6 +95,8 @@ public:
             neuralNet->trial();
         }
 
+        delete (neuralNet);
+        delete (properties);
         delete (inputProcessor);
         delete (outputProcessor);
 
