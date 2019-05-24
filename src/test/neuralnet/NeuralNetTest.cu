@@ -105,14 +105,14 @@ public:
             neuralNet->trial();
             time = timer->elapsed();
             sum += time;
-            printf("trial %i (elapsed time: %f)\n", i, time);
+            printf("trial %i (elapsed time: %f s)\n", i, time);
         }
         printf("average trial time is %f s\n", sum / nbOfTrials);
 
         /**
          * Result on one Geforce GTX 1080 Ti and 32GB host RAM:
          *
-         * average trial time is 0.499408
+         * average trial time is 0.499408 s
          *
          * About 5x too slow to be realtime (each trial represents 100ms).
          *
