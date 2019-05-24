@@ -254,6 +254,9 @@ endif
 util/Array.o:util/Array.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
+util/Timer.o:util/Timer.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
+
 test/Test.o:test/Test.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
@@ -305,12 +308,12 @@ OutputProcessor.o:OutputProcessor.cu
 NeuralNet.o:NeuralNet.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c -dc $<
 
-controller: util/Array.o Managed.o InputProcessor.o OutputProcessor.o NeuralNet.o controller.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o
+controller: util/Array.o util/Timer.o Managed.o InputProcessor.o OutputProcessor.o NeuralNet.o controller.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
-unittests: Managed.o test/Test.o test/util/ArrayTest.o InputProcessor.o OutputProcessor.o NeuralNet.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o test/unittests.o
+unittests: Managed.o test/Test.o test/util/ArrayTest.o util/Timer.o InputProcessor.o OutputProcessor.o NeuralNet.o NeuronProperties.o Phase.o CycleParity.o Neuron.o Synapse.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o test/unittests.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
@@ -322,7 +325,7 @@ test: build
 	$(EXEC) ./unittests
 
 clean:
-	rm -f util/Array.o controller unittests controller.o Managed.o CycleParity.o Phase.o NeuralNet.o InputProcessor.o OutputProcessor.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o
+	rm -f util/Array.o util/Timer.o controller unittests controller.o Managed.o CycleParity.o Phase.o NeuralNet.o InputProcessor.o OutputProcessor.o Neuron.o Synapse.o NeuronProperties.o test/unittests.o test/Test.o test/util/ArrayTest.o test/neuralnet/NeuralNetTest.o test/neuralnet/TestOutputProcessor.o test/neuralnet/TestInputProcessor.o
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/controller
 	rm -rf target/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/unittests
 

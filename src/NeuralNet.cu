@@ -231,6 +231,10 @@ NeuralNet::NeuralNet(unsigned int maxNeurons_init) : max_nb_of_threads(256), max
 }
 
 NeuralNet::~NeuralNet() {
+    for (Array<Neuron>::iterator i = neurons->begin(); i != neurons->end(); ++i) {
+        Neuron* neuron = &*i;
+        neuron->destroySynapes();
+    }
     delete neurons;
 }
 

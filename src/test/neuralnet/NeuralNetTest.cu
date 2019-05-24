@@ -10,6 +10,7 @@
 #include "../../NeuralNet.cuh"
 #include "TestInputProcessor.cu"
 #include "TestOutputProcessor.cu"
+#include "../../util/Timer.cuh"
 
 class NeuralNetTest : public Managed, public Test {
 
@@ -19,27 +20,26 @@ public:
 
     ~NeuralNetTest() {}
 
-//    __host__
-//    void hostTest() {
-//
-//        unsigned int nbOfNeurons = 1000000;
-//        int nbOfSynapses = 1000;
-//
-//        NeuralNet* neuralNet = new NeuralNet(1);
-//
-//        Neuron** data_init;
-//        cudaMallocManaged(&data_init, nbOfNeurons * sizeof(Neuron));
-//
-//        neuralNet->init();
-//
-//    }
-
     __host__
     void test() {
 
         printf("creating the neural net");
 
-        unsigned int nbOfNeurons = 2400000;
+        /**
+         * About the number of neurons
+         *
+         * We get about 2.4 million neurons in 32GB RAM if they have 1000 incoming synapses each. The theoretical number
+         * is a lot higher (4.25 million) and we don't know why the difference is so big yet. There must be some
+         * overhead, but probably not so much.
+         *
+         * With 2.4 million neurons, we can:
+         * - create 36 layers of size 256x256 (one neuron at each location)
+         * - create 9 layers of size 192x192 where each location represents a cortical column (cc) with 6 excitatory and 1 inhibitory neuron
+         * - create 20 layers of size 128x128 where each location is a cc with 6 exc. and 1 inh. neuron
+         * with each neuron having 1000 incoming synapses on average in all tree situations.
+         *
+         */
+        unsigned int nbOfNeurons = 2400000; // about 36 256x256 layers, or using 6 exc + 1 inh cort. columns: 9 192x192 cortical column layers (or 20 128x128 cc layers)
         int nbOfSynapses = 1000;
 
         NeuralNet* neuralNet = new NeuralNet(nbOfNeurons);
@@ -52,7 +52,8 @@ public:
         float activities[1] = { 0.9 };
         neuralNet->updateActivity(activities, 0, 0);
 
-        printf("Empty neural net created");
+        printf("\nEmpty neural net created\n");
+
 
         /**
          * The results of this test in 32GB RAM
@@ -69,18 +70,23 @@ public:
          *
          * 1/ with 1000 (!) synapses per neuron => process crashes between 2.400.000 and 2.500.000 neurons.
          * => the improvement is gigantic, just by dumping the pointers
+         * It is, however, still a lot lower than the theoretical 4.25 million neurons that should fit in 32GB...
+         *
+         * Remark that these measurements are done with a bare application that loads the neurons and synapses into
+         * memory, so without any surroundings infrastructure to interact with a client application that writes and
+         * reads data into and out of the neural net! So, our limits may go down a bit in the future application.
          *
          */
 
         for (int i = 1; i < nbOfNeurons; ++i) {
-            if (i % 100000 == 0) printf(" adding neuron %i", i);
+            if (i % 100000 == 0) printf(" adding neuron %i\n", i);
             Neuron *neuron = new Neuron(properties, nbOfSynapses, 0); // The 'new' triggers the 'new Array' for the synapses inside the neuron object...
             for (int j = 0; j < nbOfSynapses; ++j) {
                 Synapse synapse = Synapse(0.5f, 0);
                 neuron->addIncomingExcitatorySynapse(synapse);
             }
-            neuralNet->addNeuron(*neuron, i);
-            delete (neuron); // Doesn't delete the synapse arrays!
+            neuralNet->addNeuron(*neuron, i); // ToDo: add a factory method directly into the NeuralNet class to make creating the neuralnet more efficient.
+            delete (neuron); // Doesn't delete the synapse arrays, which is good because they are referenced by the copied neurons in the global neuron array!
         }
 
         TestInputProcessor* inputProcessor = new TestInputProcessor(neuralNet);
@@ -90,11 +96,29 @@ public:
 
         neuralNet->init();
 
-        for (int i = 0; i < 100; ++i) {
-            printf("trial %i", i);
+        Timer *timer = new Timer();
+        double time;
+        double sum = 0.0;
+        int nbOfTrials = 100;
+        for (int i = 0; i < nbOfTrials; ++i) {
+            timer->reset();
             neuralNet->trial();
+            time = timer->elapsed();
+            sum += time;
+            printf("trial %i (elapsed time: %f)\n", i, time);
         }
+        printf("average trial time is %f s\n", sum / nbOfTrials);
 
+        /**
+         * Result on one Geforce GTX 1080 Ti and 32GB host RAM:
+         *
+         * average trial time is 0.499408
+         *
+         * About 5x too slow to be realtime (each trial represents 100ms).
+         *
+         */
+
+        delete (timer);
         delete (neuralNet);
         delete (properties);
         delete (inputProcessor);
