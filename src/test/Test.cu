@@ -7,6 +7,8 @@
 
 #include <cuda_runtime.h>
 #include <string>
+#include <assert.h>
+#include <stdexcept>
 
 
 /**
@@ -33,6 +35,7 @@ public:
         cudaError = cudaGetLastError();
         if(cudaError != cudaSuccess) {
             printf("%s device failure, cudaGetLastError() returned %d: %s\n", getName(), cudaError, cudaGetErrorString(cudaError));
+            throw std::runtime_error ("CUDA Error");
         } else {
             printf("%s device test successful\n", getName());
         }

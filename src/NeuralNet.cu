@@ -187,13 +187,14 @@ __global__
 void cycleParallelized(NeuralNet* neuralNet,
                        Array<Neuron>* neurons,
                        const Phase phase,
-                       const bool beginOfPhase,
-                       const bool endOfPhase,
+                       bool beginOfPhase,
+                       bool endOfPhase,
                        const CycleParity parity,
-                       const int outcomePhDuration) {
+                       int outcomePhDuration) {
     // Using the popular grid-stride loop
     // see: https://devblogs.nvidia.com/even-easier-introduction-cuda/
     // see: https://devblogs.nvidia.com/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/
+
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
     unsigned int nbOfNeurons = neurons->getSize();
@@ -219,7 +220,7 @@ void updateWeightsParallelized(NeuralNet* neuralNet, Array<Neuron>* neurons, con
 // = = = = = = = = = = = = = = = = = =
 
 
-NeuralNet::NeuralNet() : max_nb_of_threads(256), max_nb_of_blocks(4096) {
+NeuralNet::NeuralNet() : max_nb_of_threads(256), max_nb_of_blocks(4096) { // 256 4096
     nb_of_threads = max_nb_of_threads;
     nb_of_blocks = max_nb_of_blocks;
 }
@@ -251,6 +252,12 @@ Neuron* NeuralNet::getNeuron(unsigned long int neuronIndex) {
 __host__
 void NeuralNet::init() {
     cudaDeviceSynchronize();
+
+    cudaError_t cudaError;
+    cudaError = cudaGetLastError();
+    if(cudaError != cudaSuccess) {
+        printf("Device failure during neuralnet initialization, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+    } // Device failure during activation update cycles, cudaGetLastError() returned 11: invalid argument
 }
 
 __host__
@@ -277,12 +284,12 @@ void NeuralNet::trial() {
 
 __host__
 void NeuralNet::process10HzInput() {
-    inputProcessor10Hz->processInput();
+     inputProcessor10Hz->processInput();
 }
 
 __host__
 void NeuralNet::process10HzOutput() {
-    outputProcessor10Hz->processOutput();
+     outputProcessor10Hz->processOutput();
 }
 
 __host__

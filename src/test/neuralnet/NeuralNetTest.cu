@@ -23,7 +23,7 @@ public:
     __host__
     void test() {
 
-        printf("creating the neural net");
+        printf("creating the neural net\n");
 
         /**
          * About the number of neurons
@@ -39,11 +39,13 @@ public:
          * with each neuron having 1000 incoming synapses on average in all tree situations.
          *
          */
-        unsigned int nbOfNeurons = 2400000; // about 36 256x256 layers, or using 6 exc + 1 inh cort. columns: 9 192x192 cortical column layers (or 20 128x128 cc layers)
+        unsigned int nbOfNeurons = 100; // 2400000; // about 36 256x256 layers, or using 6 exc + 1 inh cort. columns: 9 192x192 cortical column layers (or 20 128x128 cc layers)
         int nbOfSynapses = 1000;
 
         NeuralNet* neuralNet = new NeuralNet(nbOfNeurons);
-        cudaDeviceSynchronize();
+        printf("Before first init\n");
+        neuralNet->init();
+        printf("After first init\n");
 
         NeuronProperties *properties = new NeuronProperties();
 
@@ -81,12 +83,18 @@ public:
         for (int i = 1; i < nbOfNeurons; ++i) {
             if (i % 100000 == 0) printf(" adding neuron %i\n", i);
             Neuron *neuron = new Neuron(properties, nbOfSynapses, 0); // The 'new' triggers the 'new Array' for the synapses inside the neuron object...
+            // float randomActivity = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            // neuron->setExternalActivity(randomActivity);
+            neuron->setExternalActivity(0.001f);
             for (int j = 0; j < nbOfSynapses; ++j) {
-                Synapse synapse = Synapse(0.5f, 0);
+                // float randomWeight = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+                Synapse synapse = Synapse(0.6f, 0);
                 neuron->addIncomingExcitatorySynapse(synapse);
             }
             neuralNet->addNeuron(*neuron, i); // ToDo: add a factory method directly into the NeuralNet class to make creating the neuralnet more efficient.
             delete (neuron); // Doesn't delete the synapse arrays, which is good because they are referenced by the copied neurons in the global neuron array!
+
+            neuralNet->init();
         }
 
         TestInputProcessor* inputProcessor = new TestInputProcessor(neuralNet);
@@ -108,6 +116,23 @@ public:
             printf("trial %i (elapsed time: %f s)\n", i, time);
         }
         printf("average trial time is %f s\n", sum / nbOfTrials);
+
+        checkCudaErrors();
+
+        printf("\n");
+        for (int i = 0; i < nbOfNeurons; ++i) {
+            Neuron *neuron = neuralNet->getNeuron(i);
+            float activity = neuron->getActivity(OddCycle);
+            printf("%f, ", activity);
+        }
+        printf("\n\n");
+        Neuron *neuron = neuralNet->getNeuron(nbOfNeurons / 2);
+        for (Array<Synapse>::iterator j = neuron->getIncomingExcitatorySynapses()->begin(); j != neuron->getIncomingExcitatorySynapses()->end(); ++j) {
+            Synapse synapse = *j;
+            printf("%f, ", synapse.getWeight());
+        }
+
+
 
         /**
          * Result on one Geforce GTX 1080 Ti and 32GB host RAM:

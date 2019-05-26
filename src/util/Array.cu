@@ -7,6 +7,7 @@
 
 #include "../Managed.cuh"
 #include <assert.h>
+#include <stdio.h>
 
 // some useful tips:
 // https://codereview.stackexchange.com/questions/102036/c-array-with-iterators
@@ -24,17 +25,29 @@ public:
 
     __host__
     Array(unsigned int max_size_init) : max_size(max_size_init) {
-        T* data_init;
-        cudaMallocManaged(&data_init, max_size_init * sizeof(T));
-        data = data_init;
-        cudaDeviceSynchronize();
+        if (max_size_init > 0) {
+            T *data_init;
+            cudaMallocManaged(&data_init, max_size_init * sizeof(T));
+            data = data_init;
+        }
+        // We probably don't want to call in util classes...
+//        cudaDeviceSynchronize();
+//        cudaError_t cudaError;
+//        cudaError = cudaGetLastError();
+//        if(cudaError != cudaSuccess) {
+//            printf("Device failure during array initialization, cudaGetLastError() returned %d: %s\n", cudaError, cudaGetErrorString(cudaError));
+//        }
     }
 
     // Destructor
     __host__
     ~Array() {
-        cudaFree(data);
-        cudaDeviceSynchronize();
+        if (max_size > 0) {
+            cudaFree(data);
+        }
+
+        // We probably don't want to call in util classes...
+        // cudaDeviceSynchronize();
     }
 
     /**
@@ -147,7 +160,7 @@ public:
 
 
 private:
-    T* data;  // nopo
+    T* data;
     unsigned int size = 0;
     unsigned int max_size;
 };

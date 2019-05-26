@@ -16,15 +16,6 @@ void launchArrayTestDeviceTest(ArrayTest *test) {
 
 __host__
 ArrayTest::ArrayTest() : Test("ArrayTest") {
-    arr = new Array<TestContainer>(5);
-    TestContainer tc1 = TestContainer(1.0, 2.0, 300.0, 1, 2, 100);
-    TestContainer tc2 = TestContainer(4.0, 5.0, 6.0, 4, 5, 6);
-    TestContainer tc3 = TestContainer(7.0, 8.0, 9.0, 7, 8, 9);
-    arr->append(tc1);
-    arr->append(tc2);
-    arr->append(tc3);
-
-    cudaDeviceSynchronize();
 }
 
 __host__
@@ -34,10 +25,26 @@ ArrayTest::~ArrayTest() {
 
 __host__
 void ArrayTest::test() {
+    hostSetup();
     launchArrayTestDeviceTest<<< 1, 1 >>>(this);
     checkCudaErrors();
     hostTest();
     printf("%s host test successful\n", getName());
+    emptyArrayTest();
+}
+
+__host__
+void ArrayTest::hostSetup() {
+    arr = new Array<TestContainer>(5);
+    TestContainer tc1 = TestContainer(1.0, 2.0, 300.0, 1, 2, 100);
+    TestContainer tc2 = TestContainer(4.0, 5.0, 6.0, 4, 5, 6);
+    TestContainer tc3 = TestContainer(7.0, 8.0, 9.0, 7, 8, 9);
+    arr->append(tc1);
+    arr->append(tc2);
+    arr->append(tc3);
+
+    cudaDeviceSynchronize();
+    checkCudaErrors();
 }
 
 __device__
@@ -60,6 +67,13 @@ void ArrayTest::deviceTest() {
     assert(sum  == 18);
 
     return;
+}
+
+__host__
+void ArrayTest::emptyArrayTest() {
+    empty = new Array<TestContainer>(0);
+    cudaDeviceSynchronize();
+    checkCudaErrors();
 }
 
 __host__

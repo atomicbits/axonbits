@@ -29,8 +29,14 @@ public:
     __host__
     void test();
 
+    __host__
+    void hostSetup();
+
     __device__
     void deviceTest();
+
+    __host__
+    void emptyArrayTest();
 
     __host__
     void hostTest();
@@ -38,6 +44,7 @@ public:
 
 private:
     Array<TestContainer>* arr;
+    Array<TestContainer> *empty;
 
 };
 
