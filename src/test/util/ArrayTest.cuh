@@ -39,6 +39,9 @@ public:
     void emptyArrayTest();
 
     __host__
+    void setArrayElementTest();
+
+    __host__
     void hostTest();
 
 

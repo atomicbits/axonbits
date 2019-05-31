@@ -24,7 +24,7 @@ class Array : public Managed {
 public:
 
     __host__
-    Array(unsigned int max_size_init) : max_size(max_size_init) {
+    Array(unsigned int max_size_init) : max_size(max_size_init), size(0) {
         if (max_size_init > 0) {
             T *data_init;
             cudaMallocManaged(&data_init, max_size_init * sizeof(T));
@@ -77,7 +77,7 @@ public:
 
     __host__ __device__
     T& operator[](unsigned int index) {
-        if(index>=max_size) assert(0); // ToDo: exception handling on device, how?
+        if (index>=max_size) assert(0); // ToDo: exception handling on device, how?
         return data[index]; // are we returning the address of the element?
     }
 
@@ -89,9 +89,9 @@ public:
 
     __host__ __device__
     void set(T &element, unsigned int index) {
-        if(index>=max_size) assert(0); // ToDo: exception handling on device, how?
+        if (index >= max_size) assert(0); // ToDo: exception handling on device, how?
         data[index] = element;
-        if(index > size - 1) {
+        if (index + 1 > size) {
             size = index + 1; // We set the size based on the largest seen index, assuming the owner fills it up without gaps!
         }
     }
@@ -161,7 +161,7 @@ public:
 
 private:
     T* data;
-    unsigned int size = 0;
+    unsigned int size;
     unsigned int max_size;
 };
 

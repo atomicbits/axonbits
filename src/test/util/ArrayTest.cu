@@ -31,6 +31,7 @@ void ArrayTest::test() {
     hostTest();
     printf("%s host test successful\n", getName());
     emptyArrayTest();
+    setArrayElementTest();
 }
 
 __host__
@@ -74,6 +75,18 @@ void ArrayTest::emptyArrayTest() {
     empty = new Array<TestContainer>(0);
     cudaDeviceSynchronize();
     checkCudaErrors();
+}
+
+__host__
+void ArrayTest::setArrayElementTest() {
+    Array<TestContainer>* setArray = new Array<TestContainer>(4);
+    TestContainer tc1 = TestContainer(1.0, 2.0, 300.0, 1, 2, 100);
+    TestContainer tc2 = TestContainer(4.0, 5.0, 6.0, 4, 5, 6);
+    TestContainer tc3 = TestContainer(7.0, 8.0, 9.0, 7, 8, 9);
+    setArray->set(tc1, 0);
+    setArray->set(tc2, 1);
+    setArray->set(tc3, 2);
+    assert(setArray->getSize() == 3);
 }
 
 __host__

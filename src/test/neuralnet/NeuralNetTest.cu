@@ -39,7 +39,7 @@ public:
          * with each neuron having 1000 incoming synapses on average in all tree situations.
          *
          */
-        unsigned int nbOfNeurons = 100; // 2400000; // about 36 256x256 layers, or using 6 exc + 1 inh cort. columns: 9 192x192 cortical column layers (or 20 128x128 cc layers)
+        unsigned int nbOfNeurons = 100000; // 2400000 neurons is about 36 256x256 layers, or using 6 exc + 1 inh cort. columns: 9 192x192 cortical column layers (or 20 128x128 cc layers)
         int nbOfSynapses = 1000;
 
         NeuralNet* neuralNet = new NeuralNet(nbOfNeurons);
@@ -97,6 +97,7 @@ public:
             neuralNet->init();
         }
 
+
         TestInputProcessor* inputProcessor = new TestInputProcessor(neuralNet);
         TestOutputProcessor* outputProcessor = new TestOutputProcessor(neuralNet);
         neuralNet->register10HzInputProcessor(inputProcessor);
@@ -120,17 +121,18 @@ public:
         checkCudaErrors();
 
         printf("\n");
-        for (int i = 0; i < nbOfNeurons; ++i) {
+        for (int i = 0; i < 100; ++i) {
             Neuron *neuron = neuralNet->getNeuron(i);
             float activity = neuron->getActivity(OddCycle);
             printf("%f, ", activity);
         }
         printf("\n\n");
-        Neuron *neuron = neuralNet->getNeuron(nbOfNeurons / 2);
-        for (Array<Synapse>::iterator j = neuron->getIncomingExcitatorySynapses()->begin(); j != neuron->getIncomingExcitatorySynapses()->end(); ++j) {
-            Synapse synapse = *j;
-            printf("%f, ", synapse.getWeight());
-        }
+//        printf("synapses:\n");
+//        Neuron *neuron = neuralNet->getNeuron(nbOfNeurons / 2);
+//        for (Array<Synapse>::iterator j = neuron->getIncomingExcitatorySynapses()->begin(); j != neuron->getIncomingExcitatorySynapses()->end(); ++j) {
+//            Synapse synapse = *j;
+//            printf("%f, ", synapse.getWeight());
+//        }
 
 
 
