@@ -21,17 +21,16 @@ float positivePart(float x) {
  */
 __device__
 float avgInputActivity(NeuralNet *neuralNet, Array<Synapse>* synapses, const CycleParity parity) {
-    int number = 0;
     float sum = 0.0;
-    for(Array<Synapse>::iterator i = synapses->begin(); i != synapses->end(); ++i) {
-        Synapse* synapse = &*i;
-        float weight = synapse->getWeight();
-        float activity = neuralNet->getNeuron(synapse->getSource())->getActivity(parity);
+    for (Array<Synapse>::iterator i = synapses->begin(); i != synapses->end(); ++i) {
+        Synapse &synapse = *i;
+        float weight = synapse.getWeight();
+        float activity = neuralNet->getNeuron(synapse.getSource())->getActivity(parity);
         sum += activity * weight;
-        ++number;
     }
-    if(number == 0) return 0.0;
-    else return sum / (float)number;
+    int number = synapses->getSize();
+    if (number == 0) return 0.0;
+    else return sum / (float) number;
 }
 
 /**
@@ -126,7 +125,7 @@ void updateIncomingSynapsesWeights(NeuralNet* neuralNet, Neuron* neuron, const C
 
 __device__
 void updateNeuronActivity(NeuralNet* neuralNet,
-                          Neuron* neuron,
+                          Neuron &neuron,
                           const Phase phase,
                           const bool beginOfPhase,
                           const bool endOfPhase,
@@ -135,9 +134,9 @@ void updateNeuronActivity(NeuralNet* neuralNet,
 
     if (beginOfPhase) {
         if (phase == ExpectationPhase) {
-            neuron->resetMediumTimeSumActivity();
+            neuron.resetMediumTimeSumActivity();
         } else if (phase == OutcomePhase) {
-            neuron->resetShortTimeSumActivity();
+            neuron.resetShortTimeSumActivity();
         }
     }
 
@@ -156,9 +155,9 @@ void updateNeuronActivity(NeuralNet* neuralNet,
 
     // g_i_rel should be calculated as defined in FFFB inhibition function, or a better and more local way?
     // can we use local inhibition neurons to replace FFFB in a simple way?
-    Array<Synapse>* inhibitorySynapses = neuron->getIncomingInhibitorySynapses();
-    Array<Synapse>* excitatorySynapses = neuron->getIncomingExcitatorySynapses();
-    float y_current = neuron->getActivity(parity);
+    Array<Synapse>* inhibitorySynapses = neuron.getIncomingInhibitorySynapses();
+    Array<Synapse>* excitatorySynapses = neuron.getIncomingExcitatorySynapses();
+    float y_current = neuron.getActivity(parity);
     float y; // the new activity we have to calculate
 
     if (inhibitorySynapses->getSize() == 0 && excitatorySynapses->getSize() == 0) {
@@ -180,16 +179,16 @@ void updateNeuronActivity(NeuralNet* neuralNet,
         y = y_current + dt_vm * (y_star - y_current); // new activity for the neuron
     }
 
-    neuron->updateActivity(y, parity);
+    neuron.updateActivity(y, parity);
 
     if (phase == ExpectationPhase) {
-        neuron->incrementMediumTimeSumActivity(y);
+        neuron.incrementMediumTimeSumActivity(y);
     } else if (phase == OutcomePhase) {
-        neuron->incrementShortTimeSumActivity(y);
+        neuron.incrementShortTimeSumActivity(y);
         if (endOfPhase) {
             // Update the long time average activity based on the most recent short time average activity.
             float alpha = 0.02;
-            neuron->incrementLongTimeAverageActivity(neuron->getShortTimeAverageActivity(outcomePhDuration), alpha);
+            neuron.incrementLongTimeAverageActivity(neuron.getShortTimeAverageActivity(outcomePhDuration), alpha);
         }
     }
 }
@@ -209,8 +208,9 @@ void cycleParallelized(NeuralNet* neuralNet,
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
     unsigned int nbOfNeurons = neurons->getSize();
+    Array<Neuron> &neuronsDeref = *neurons;
     for (int i = index; i < nbOfNeurons; i += stride) {
-        Neuron* neuron = &((*neurons)[i]);
+        Neuron &neuron = neuronsDeref[i];
         updateNeuronActivity(neuralNet, neuron, phase, beginOfPhase, endOfPhase, parity, outcomePhDuration);
     }
 }

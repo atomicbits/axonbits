@@ -38,9 +38,85 @@ public:
          * - create 20 layers of size 128x128 where each location is a cc with 6 exc. and 1 inh. neuron
          * with each neuron having 1000 incoming synapses on average in all tree situations.
          *
+         * Mind that these numbers of neurons can, by no means, be modeled in real-time on a modest GPU like the
+         * GeForce GTX 1080 Ti.
+         *
          */
-        unsigned int nbOfNeurons = 100000; // 2400000 neurons is about 36 256x256 layers, or using 6 exc + 1 inh cort. columns: 9 192x192 cortical column layers (or 20 128x128 cc layers)
-        int nbOfSynapses = 1000;
+        unsigned int nbOfNeurons = 17500;
+        int nbOfSynapses = 100;
+
+        // ToDo: replace all calculations with 'half' type instead of working with the 'float' type and hope for a performance boost
+        //
+        // Going below 5000 neurons will not change the execution performance for a given number of synapses, because
+        // of the parallellisation that is underused below that number (parallellisation is done at the level of the
+        // neurons).
+        // At 5000 neurons and 1000 synapses per neuron, we have an avg trial time of around 0.150s, above the
+        // necessary 0.100s to be real-time. To make this real-time, we have to drop the number of synapses to 650.
+        //
+        // unsigned int nbOfNeurons = 5000;
+        // int nbOfSynapses = 1000;
+
+        // Real-time processing, only 0.3GB of GPU memory used, avg trial time of 0.100s
+        // unsigned int nbOfNeurons = 17500;
+        // int nbOfSynapses = 100;
+
+        // Some measurements below for comparison. Know that real-time is considered at an avg trial of 0.100s.
+        // Note that we see that most of the trials are about 12% faster than the average, but some (but regular)
+        // outliers that are about 2.5 times those faster times are blowing up the average number. We have no
+        // explanation yet for this behaviour.
+        // - -
+        // neurons: 5000
+        // synapses: 100
+        // avg trial: 0.030s
+        // - -
+        // neurons: 10000
+        // synapses: 100
+        // avg trial: 0.041s
+        // - -
+        // neurons: 15000
+        // synapses: 100
+        // avg trial: 0.088s
+        // - -
+        // neurons: 17500
+        // synapses: 100
+        // avg trial: 0.109s
+        // - -
+        // neurons: 20000
+        // synapses: 100
+        // avg trial: 0.158s
+        // - -
+        // neurons: 5000
+        // synapses: 650
+        // avg trial: 0.100s
+        // - -
+        // neurons: 7000
+        // synapses: 650
+        // avg trial: 0.126s
+        // - -
+        // neurons: 10000
+        // synapses: 650
+        // avg trial: 0.222s
+        // - -
+        // neurons: 5000
+        // synapses: 1000
+        // avg trial: 0.150s
+        // - -
+        // neurons: 10000
+        // synapses: 1000
+        // avg trial: 0.319s
+        // - -
+        // neurons: 12500
+        // synapses: 1000
+        // avg trial: 0.544s
+        // - -
+        // neurons: 15000
+        // synapses: 1000
+        // avg trial: 1.120s
+        // - -
+
+        // max in 32GB RAM memory:
+        // unsigned int nbOfNeurons = 2400000; // 2400000 neurons is about 36 256x256 layers, or using 6 exc + 1 inh cort. columns: 9 192x192 cortical column layers (or 20 128x128 cc layers)
+        // int nbOfSynapses = 100;
 
         NeuralNet* neuralNet = new NeuralNet(nbOfNeurons);
         printf("Before first init\n");
